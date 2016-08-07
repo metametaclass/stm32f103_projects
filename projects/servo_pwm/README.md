@@ -1,7 +1,7 @@
 # README
 
 
-Servo example ported/from from https://github.com/wendlers/stm32-pwm-servo-sample 
+Servo example ported/fixed from https://github.com/wendlers/stm32-pwm-servo-sample 
 
 Generic stm32f103c8t6 board is used in this example.
 
