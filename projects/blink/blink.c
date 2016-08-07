@@ -50,7 +50,7 @@ int main(void)
   /* Blink the LED (PC13) on the board. */
   while (1) {
     gpio_toggle(GPIOC, GPIO13); /* LED on/off */
-    for (i = 0; i < 800000; i++)  /* Wait a bit. */
+    for (i = 0; i < 8000000; i++)  /* Wait a bit. */
       __asm__("nop");
   }
 

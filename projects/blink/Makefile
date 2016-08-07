@@ -19,7 +19,8 @@
 
 BINARY = blink
 
-OPENCM3_DIR=../libopencm3
+#not needed - path searched in libopencm3.rules.mk
+#OPENCM3_DIR=../libopencm3
 
 LDSCRIPT = ../stm32-f103.ld
 
