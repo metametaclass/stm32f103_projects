@@ -69,13 +69,19 @@ static void set_servos(uint32_t pos1_us, uint32_t pos2_us)
 
 int main(void)
 {
+     int i;
      clock_init();
      gpio_init();
      servo_init();
 
      //gpio_set(GPIOC, GPIO13);
 
-     delay(150000000);
+     for(i=0;i<100;i++){
+       gpio_toggle(GPIOC, GPIO13); /* LED on/off */   
+       delay(1500000);
+     }
+
+     gpio_clear(GPIOC, GPIO13);  
 
      // let pan-til "look around a little"
      while(1) {
