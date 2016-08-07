@@ -24,8 +24,9 @@
 
 /**
  * Prescale 72000000 Hz system clock by 72 = 1000000 Hz.
+ * use 72-1 per https://github.com/libopencm3/libopencm3-examples/issues/140
  */
-#define PWM_PRESCALE	(72)
+#define PWM_PRESCALE	(71) 
 
 /**
  * We need a 50 Hz period (1000 / 20ms = 50), thus devide 100000 by 50 = 20000 (us).
