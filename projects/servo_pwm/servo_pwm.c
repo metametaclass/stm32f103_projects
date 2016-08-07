@@ -41,7 +41,7 @@ static void gpio_init(void)
      /*
       * set GPIO12 at PORTC (led) to 'output alternate function push-pull'.
       */
-     gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, GPIO12);
+     gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_50_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, GPIO13);
 }
 
 /**
@@ -59,68 +59,52 @@ static void delay(int d)
      }
 }
 
+static void set_servos(uint32_t pos1_us, uint32_t pos2_us)
+{
+     gpio_toggle(GPIOC, GPIO13); /* LED on/off */   
+     servo_set_position(SERVO_CH1, pos1_us);
+     servo_set_position(SERVO_CH2, pos2_us);
+     delay(15000000);
+}
+
 int main(void)
 {
      clock_init();
      gpio_init();
      servo_init();
 
-     gpio_set(GPIOC, GPIO12);
+     //gpio_set(GPIOC, GPIO13);
 
      delay(150000000);
 
      // let pan-til "look around a little"
      while(1) {
-          servo_set_position(SERVO_CH1, SERVO_MIN);
-          servo_set_position(SERVO_CH2, SERVO_MAX);
-          delay(15000000);
+          set_servos(SERVO_MIN, SERVO_MAX);
 
-          servo_set_position(SERVO_CH1, SERVO_NULL);
-          servo_set_position(SERVO_CH2, SERVO_NULL);
-          delay(15000000);
+          set_servos(SERVO_NULL, SERVO_NULL);
 
-          servo_set_position(SERVO_CH1, SERVO_MAX);
-          servo_set_position(SERVO_CH2, SERVO_MIN);
-          delay(15000000);
+          set_servos(SERVO_MAX, SERVO_MIN);
 
-          servo_set_position(SERVO_CH1, SERVO_NULL);
-          servo_set_position(SERVO_CH2, SERVO_NULL);
-          delay(15000000);
+          set_servos(SERVO_NULL, SERVO_NULL);
 
-          servo_set_position(SERVO_CH1, SERVO_MIN);
-          servo_set_position(SERVO_CH2, SERVO_MIN);
-          delay(15000000);
+          set_servos(SERVO_MIN, SERVO_MIN);
 
-          servo_set_position(SERVO_CH1, SERVO_MAX);
-          servo_set_position(SERVO_CH2, SERVO_MAX);
-          delay(15000000);
+          set_servos(SERVO_MAX, SERVO_MAX);
 
-          servo_set_position(SERVO_CH1, SERVO_NULL);
-          servo_set_position(SERVO_CH2, SERVO_NULL);
-          delay(15000000);
+          set_servos(SERVO_NULL, SERVO_NULL);
 
-          servo_set_position(SERVO_CH1, SERVO_MIN);
-          servo_set_position(SERVO_CH2, SERVO_NULL);
-          delay(15000000);
+          set_servos(SERVO_MIN, SERVO_NULL);
 
-          servo_set_position(SERVO_CH1, SERVO_MAX);
-          servo_set_position(SERVO_CH2, SERVO_NULL);
+          set_servos(SERVO_MAX, SERVO_NULL);
 
-          servo_set_position(SERVO_CH1, SERVO_NULL);
-          servo_set_position(SERVO_CH2, SERVO_NULL);
-          delay(15000000);
+          set_servos(SERVO_NULL, SERVO_NULL);
 
-          servo_set_position(SERVO_CH1, SERVO_NULL);
-          servo_set_position(SERVO_CH2, SERVO_MIN);
-          delay(15000000);
+          set_servos(SERVO_NULL, SERVO_MIN);
 
-          servo_set_position(SERVO_CH1, SERVO_NULL);
-          servo_set_position(SERVO_CH2, SERVO_MAX);
-          delay(15000000);
+          set_servos(SERVO_NULL, SERVO_MAX);
 
-          servo_set_position(SERVO_CH1, SERVO_NULL);
-          servo_set_position(SERVO_CH2, SERVO_NULL);
-          delay(15000000);
+          set_servos(SERVO_NULL, SERVO_NULL);
+
      }
 
      return 0;
