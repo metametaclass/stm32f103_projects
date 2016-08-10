@@ -34,9 +34,7 @@ git submodule update
 
 * run MSYS with PATH to python and gcc:
 
-** create script in MSYS folder (where msys.bat is located):
-
-run_msys_gcc_arm.cmd:
+* create and run script run_msys_gcc_arm.cmd in MSYS folder (where msys.bat is located):
 
 ```
 rem change path to installed python and gcc-arm 'bin' folder
@@ -44,7 +42,6 @@ set PATH=%PATH%;D:\Programm\Python27;D:\Programm\gcc-arm\bin
 call %~dp0msys.bat
 ```
 
-** run it.
 
 * build libopencm3:
 
