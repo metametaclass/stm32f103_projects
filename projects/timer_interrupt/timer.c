@@ -43,26 +43,49 @@ static void nvic_setup(void)
 void tim2_isr(void)
 {
 
-  //original version - R-M-W working 
-  //TIM_SR(TIM2) &= ~TIM_SR_UIF; /* Clear interrupt flag. */
-
-  //clear without check - doesn`t working
-  //timer_clear_flag(TIM2, TIM_SR_UIF);
-
   //pull request, which removes R-M-W from timer_clear_flag (all bits are rw_c0)
   //https://github.com/libopencm3/libopencm3/issues/392
   //https://github.com/libopencm3/libopencm3/pull/492
   //https://github.com/libopencm3/libopencm3/pull/492/commits/c7fcba49f4365ac190351ebc3813a6df635c1019z
-  //timer_clear_flag ->  TIM_SR(timer_peripheral) = ~flag;
+  //timer_clear_flag  ->  TIM_SR(timer_peripheral) = ~flag;
+  //but R-M-W actually needed when led toggled first?
 
-  //but R-M-W actually needed, interrupt flag should be checked before clearing ?
 
+  //original version - R-M-W
+  //works, order doesn`t matter
+  //gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
+  //TIM_SR(TIM2) &= ~TIM_SR_UIF; /* Clear interrupt flag. */
+
+  
+  //clear without check, clear first
+  //works
+  //timer_clear_flag(TIM2, TIM_SR_UIF);
+  //gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
+  
+
+  //clear without check, LED first
+  //doesn`t work (!)
+  //gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
+  //timer_clear_flag(TIM2, TIM_SR_UIF);
+
+
+  //paranoid version from timer_clear_flag above, clear first 
+  //works, order doesn`t matter
+  //gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
+  //TIM_SR(TIM2) = ~TIM_SR_UIF | (TIM_SR(TIM2) & 0xffffe0c0);
+  
+  //copy of non-paranoid timer_clear_flag
+  //works, order doesn`t matter  
+  //gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
+  //TIM_SR(TIM2) = ~TIM_SR_UIF;
+   
+
+  //check and clear
+  //works, order doesn`t matter  
   if (timer_get_flag(TIM2, TIM_SR_UIF)) {
+    gpio_toggle(GPIOC, GPIO13);   // LEDon/off.    
     timer_clear_flag(TIM2, TIM_SR_UIF);
-
-    gpio_toggle(GPIOC, GPIO13);   /* LED2 on/off. */
-    
-  }
+  }  
 }
 
 int main(void)
