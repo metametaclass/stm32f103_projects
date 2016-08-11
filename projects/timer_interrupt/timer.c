@@ -66,8 +66,8 @@ void tim2_isr(void)
   //clear without check, LED first
   //doesn`t work (!)
   //if call to timer_clear_flag removed, then blinks one time
-  gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
-  timer_clear_flag(TIM2, TIM_SR_UIF);
+  //gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
+  //timer_clear_flag(TIM2, TIM_SR_UIF);
 
 
   //paranoid version from timer_clear_flag above, clear first 
@@ -83,10 +83,10 @@ void tim2_isr(void)
 
   //check and clear
   //works, order doesn`t matter  
-  /*if (timer_get_flag(TIM2, TIM_SR_UIF)) {
+  if (timer_get_flag(TIM2, TIM_SR_UIF)) {
     gpio_toggle(GPIOC, GPIO13);   // LEDon/off.    
     timer_clear_flag(TIM2, TIM_SR_UIF);
-  }  */
+  }
 }
 
 int main(void)
