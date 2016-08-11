@@ -72,11 +72,12 @@ https://github.com/rogerclarkmelbourne/Arduino_STM32/wiki/Programming-an-STM32F1
 
 stlink -> board programming pins
 
+```
 8 Vcc(3.3) -> 3.3
 2 SWDIO    -> SWDIO  (PA13, pin 34)
 6 SWCLK    -> SWDCLK (PA14, pin 37)
 4 Ground   -> GND
-
+```
 
 * interactive programming:
 run openocd
