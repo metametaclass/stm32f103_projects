@@ -29,7 +29,7 @@
 #define PWM_PRESCALE	(71) 
 
 /**
- * We need a 50 Hz period (1000 / 20ms = 50), thus devide 100000 by 50 = 20000 (us).
+ * We need a 50 Hz period (1000 / 20ms = 50), thus divide 100000 by 50 = 20000 (us).
  */
 #define PWM_PERIOD		(20000)
 
