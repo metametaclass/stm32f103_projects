@@ -63,3 +63,6 @@ make
 ```
 
 
+# Programming on linux:
+
+https://github.com/rogerclarkmelbourne/Arduino_STM32/wiki/Programming-an-STM32F103XXX-with-a-generic-%22ST-Link-V2%22-programmer-from-Linux
