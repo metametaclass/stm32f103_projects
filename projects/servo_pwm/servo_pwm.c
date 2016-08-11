@@ -64,7 +64,7 @@ static void set_servos(uint32_t pos1_us, uint32_t pos2_us)
      gpio_toggle(GPIOC, GPIO13); /* LED on/off */   
      servo_set_position(SERVO_CH1, pos1_us);
      servo_set_position(SERVO_CH2, pos2_us);
-     delay(15000000);
+     delay(45000000);
 }
 
 int main(void)
