@@ -5,7 +5,8 @@ Blinking is made with the timer interrupt of the TIM2 timer.
 
 Adapted from https://github.com/libopencm3/libopencm3-examples/tree/master/examples/stm32/f1/other/timer_interrupt
 
-See also interrupt flag clear issue: https://github.com/libopencm3/libopencm3/pull/492
-
+See also interrupt flag clear issues:
+https://github.com/libopencm3/libopencm3/pull/492
+https://github.com/libopencm3/libopencm3/issues/392
 
 

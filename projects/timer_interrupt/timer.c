@@ -50,6 +50,7 @@ void tim2_isr(void)
   //timer_clear_flag(TIM2, TIM_SR_UIF);
 
   //pull request, which removes R-M-W from timer_clear_flag (all bits are rw_c0)
+  //https://github.com/libopencm3/libopencm3/issues/392
   //https://github.com/libopencm3/libopencm3/pull/492
   //https://github.com/libopencm3/libopencm3/pull/492/commits/c7fcba49f4365ac190351ebc3813a6df635c1019z
   //timer_clear_flag ->  TIM_SR(timer_peripheral) = ~flag;
