@@ -63,6 +63,44 @@ make
 ```
 
 
-# Programming on linux:
+# Programming on Linux with STLinkV2:
 
 https://github.com/rogerclarkmelbourne/Arduino_STM32/wiki/Programming-an-STM32F103XXX-with-a-generic-%22ST-Link-V2%22-programmer-from-Linux
+
+
+* Wiring
+
+stlink -> board programming pins
+
+8 Vcc(3.3) -> 3.3
+2 SWDIO    -> SWDIO  (PA13, pin 34)
+6 SWCLK    -> SWDCLK (PA14, pin 37)
+4 Ground   -> GND
+
+
+* interactive programming:
+run openocd
+
+```
+openocd -f /usr/share/openocd/scripts/interface/stlink-v2.cfg -f /usr/share/openocd/scripts/target/stm32f1x_stlink.cfg
+```
+
+* run in separate terminal:
+```
+telnet localhost 4444
+reset halt; flash write_image erase binary.elf; reset run
+
+```
+
+
+
+* automatic programming from script:
+
+```
+openocd -f /usr/share/openocd/scripts/interface/stlink-v2.cfg \
+        -f /usr/share/openocd/scripts/target/stm32f1x_stlink.cfg \
+        -c init -c "reset halt; flash write_image erase binary.elf; reset run; shutdown"
+```
+
+`init` command is imporant, all other commands works only after init call
+
