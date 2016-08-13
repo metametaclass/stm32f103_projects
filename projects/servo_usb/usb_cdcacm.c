@@ -1,5 +1,7 @@
 
 #include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/usb/usbd.h>
@@ -193,18 +195,25 @@ static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 {
   (void)ep;
   (void)usbd_dev;
-
+  int i, outlen;
   char buf[64];
+  char out[10];
+
   int len = usbd_ep_read_packet(usbd_dev, 0x01, buf, 64);
 
   if (len) {
-    while (usbd_ep_write_packet(usbd_dev, 0x82, buf, len) == 0);
-    buf[len] = 0;
+    for(i=0;i<len;i++){
+      memset(out, 0, sizeof(out));
+      outlen = sprintf(out, "%d\n", (int)buf[i]);
+      while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
+    } 
+        
     //servo_set_position(SERVO_CH1, SERVO_NULL);
   }
 
   gpio_toggle(GPIOC, GPIO13);
 }
+
 
 static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 {
