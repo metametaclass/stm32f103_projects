@@ -226,7 +226,7 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 usbd_device* init_usb_cdcacm(void)
 {
 
-  int i;
+  //int i;
 
   usbd_device *usbd_dev;
 
