@@ -12,16 +12,20 @@
     write data;
 }%%
 
-int parse_stdin_command(char *data, int length)
+#ifdef TEST_RAGEL_PARSER
+static int parse_stdin_command(char *data, int length)
+#else
+static int parse_stdin_command(usb_device *usbd_dev, char *data, int length) 
+#endif
 {
 
-    int rc;
+    //int rc;
     const char *p = data, *pe = data + length;
     const char *eof = pe;    
     const char *start = data;
 
     int p1 = 0;
-#if TEST_RAGEL_PARSER
+#ifdef TEST_RAGEL_PARSER
     int p2 = 0;
 #else
     int p2 = SERVO_NULL;

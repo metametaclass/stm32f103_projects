@@ -190,6 +190,7 @@ static int cdcacm_control_request(usbd_device *usbd_dev, struct usb_setup_data *
   return 0;
 }
 
+//#include "ragel/servo_command_line.inc"
 
 static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 {
@@ -207,7 +208,8 @@ static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
       outlen = sprintf(out, "%d\n", (int)buf[i]);
       while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
     } 
-        
+    //TODO: use readline with global buffer and \r\n eol
+    //parse_stdin_command(usbd_dev, buf, len);        
     //servo_set_position(SERVO_CH1, SERVO_NULL);
   }
 
