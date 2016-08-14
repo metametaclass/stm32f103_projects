@@ -3,6 +3,8 @@
 
 #include <libopencm3/usb/usbd.h>
 
-usbd_device* init_usb_cdcacm(void);
+void init_usb_cdcacm(void);
+
+void usb_poll_loop(void);
 
 #endif

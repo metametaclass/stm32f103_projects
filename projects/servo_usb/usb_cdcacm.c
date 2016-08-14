@@ -10,6 +10,9 @@
 #include "usb_cdcacm.h"
 #include "../servo_pwm/servo.h"
 
+#include "../../libs/microrl/microrl.h"
+
+
 static const struct usb_device_descriptor dev = {
   .bLength = USB_DT_DEVICE_SIZE,
   .bDescriptorType = USB_DT_DEVICE,
@@ -190,6 +193,17 @@ static int cdcacm_control_request(usbd_device *usbd_dev, struct usb_setup_data *
   return 0;
 }
 
+//readline and usbdev ptr struct
+typedef struct usb_command_line_s {
+  microrl_t prl;
+  usbd_device *usbd_dev;
+} usb_command_line_t;
+
+
+
+static usb_command_line_t usb_cmd_line;
+
+
 //#include "ragel/servo_command_line.inc"
 
 static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
@@ -234,15 +248,17 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 }
 
 
-usbd_device* init_usb_cdcacm(void)
+void init_usb_cdcacm(void)
 {
 
-  //int i;
+  usb_cmd_line.usbd_dev = usbd_init(&st_usbfs_v1_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
+  usbd_register_set_config_callback(usb_cmd_line.usbd_dev, cdcacm_set_config);
 
-  usbd_device *usbd_dev;
+}
 
-  usbd_dev = usbd_init(&st_usbfs_v1_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
-  usbd_register_set_config_callback(usbd_dev, cdcacm_set_config);
 
-  return usbd_dev;
+void usb_poll_loop(void){
+     while (1)
+       usbd_poll(usb_cmd_line.usbd_dev);
+
 }

@@ -102,7 +102,7 @@ static void tim3_init(void)
 int main(void)
 {
      int i;
-     usbd_device* usbd_dev;
+     //usbd_device* usbd_dev;
 
      clock_init();
      gpio_init();
@@ -125,16 +125,14 @@ int main(void)
 
      set_servos(SERVO_NULL, SERVO_NULL);
 
-     usbd_dev = init_usb_cdcacm();
+     init_usb_cdcacm();
 
      gpio_clear(GPIOC, GPIO13);
      for (i = 0; i < 0x800000; i++)
        __asm__("nop");
      gpio_set(GPIOC, GPIO13);  
 
-     while (1)
-       usbd_poll(usbd_dev);
-
+     usb_poll_loop();
 
      /*
      // let pan-til "look around a little"
