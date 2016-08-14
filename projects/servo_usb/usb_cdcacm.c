@@ -398,16 +398,16 @@ static void process_interactive(int ch, char cmd)
     case 's':
       real_pos = servo_rotate_limits(channel_id, 100, servo_pos_min, servo_pos_max);
       break;
-    case 'a':
+    case 'd':
       real_pos = servo_rotate_limits(channel_id, -10, servo_pos_min, servo_pos_max);
       break;
-    case 'd':
+    case 'a':
       real_pos = servo_rotate_limits(channel_id, 10, servo_pos_min, servo_pos_max);
       break;
-    case 91:
+    case 93:
       real_pos = servo_set_position_limits(channel_id, 1000, servo_pos_min, servo_pos_max);  
       break;
-    case 93:
+    case 91:
       real_pos = servo_set_position_limits(channel_id, 2000, servo_pos_min, servo_pos_max);  
       break;
     case 'c':
