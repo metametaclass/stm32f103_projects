@@ -27,7 +27,7 @@ Token is word separate by white space, for example 3 token line:
 Define you prompt string here. You can use colors escape code, for highlight you prompt,
 for example this prompt will green color (if you terminal supports color)*/
 //#define _PROMPT_DEFAULT "\033[32mIRin >\033[0m "  // green color
-#define _PROMPT_DEFAULT "\033[32mIRin >\033[0m "  // green color
+#define _PROMPT_DEFAULT "\033[32mmRL>\033[0m "  // green color
 //#define _PROMPT_DEFAULT "IRin > "
 
 /*
