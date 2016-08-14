@@ -7,5 +7,5 @@ all: servo_command_line.inc servo_command_line.elf servo_command_line.dot
 	ragel -G2 -L -o $@ $<
 
 %.elf: %.c %.inc
-	gcc -o $@ $<
+	gcc -g -o $@ $<
 

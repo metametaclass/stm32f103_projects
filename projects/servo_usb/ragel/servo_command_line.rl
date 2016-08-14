@@ -6,6 +6,7 @@
 
 #endif
 
+#define MAX_CALL_PARAMS 3
 
 %%{
     machine servo_command_line;
@@ -13,6 +14,12 @@
 }%%
 
 #ifdef TEST_RAGEL_PARSER
+
+static void for_debug(void)
+{
+  printf("for_debug\n");
+}
+
 static int parse_stdin_command(const char *data, int length)
 #else
 static int parse_stdin_command(const char *data, int length) 
@@ -24,15 +31,10 @@ static int parse_stdin_command(const char *data, int length)
     const char *eof = pe;    
     const char *start = data;
 
-    int p1 = 0;
-#ifdef TEST_RAGEL_PARSER
-    int p2 = 0;
-#else
-    int p2 = SERVO_NULL;
-#endif
-    //int outlen;
-    char out[80];
-
+    int tmp;
+   
+    int params[MAX_CALL_PARAMS] = {0};
+    int param_num = 0;
 
     int cs;
 
@@ -46,13 +48,31 @@ static int parse_stdin_command(const char *data, int length)
             start = fpc;
         }
 
-
         action end_literal { 
 #ifdef TEST_RAGEL_PARSER
             printf(">>end_literal: %ld \"%.*s\"\n", fpc-data, (int)(fpc-start), start); 
 #else
-            //TODO: atoi with length!
 #endif
+        }      
+
+        action end_numeric { 
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %ld \"%.*s\"\n", fpc-data, (int)(fpc-start), start); 
+            for_debug(); 
+#endif
+            tmp = 0;
+            while(start<fpc){
+               tmp = tmp*10 + (*start - '0');
+               start++;
+            }
+            if(param_num<MAX_CALL_PARAMS){
+               params[param_num] = tmp;
+               param_num++;
+            }
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+#endif
+
         }
 
 
@@ -74,24 +94,7 @@ static int parse_stdin_command(const char *data, int length)
             printf("SET\n");
 #else
             
-            /*outlen = */sprintf(out, "servo:%d value:%d\n", p1, p2);
-            print(out);
-            //while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
-
-            switch(p1){
-               case 1:
-                 servo_set_position(SERVO_CH1, p2); 
-                 break;
-               case 2:
-                 servo_set_position(SERVO_CH2, p2); 
-                 break;
-               default:
-                  
-                 /*outlen = */sprintf(out, "WARN: servo number error. servo:%d value:%d\n", p1, p2);
-                 print(out); 
-                 //while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
-                 break;
-            }
+            cli_SET(params[0], params[1]);
             
 #endif
         }
@@ -118,7 +121,7 @@ static int parse_stdin_command(const char *data, int length)
         str_literal = '"' ((any - '"')** >begin_literal %end_literal)  '"' ;
         param = space* str_literal space* ;
 
-        param_numeric = space* (digit+ >begin_literal %end_literal) space* ; 
+        param_numeric = space* (digit+ >begin_literal %end_numeric) space* ; 
 
 
         main := (( "set"  space* '(' param_numeric ',' param_numeric ')' @set space* )  | 

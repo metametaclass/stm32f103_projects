@@ -226,6 +226,32 @@ static void usb_print(microrl_t *prl, const char *str)
 }
 
 
+static void cli_SET(int p1, int p2)
+{
+  char out[80];
+  uint32_t real_pos = 0;
+  /*outlen = */sprintf(out, "servo:%d value:%d\n", p1, p2);
+  print(out);
+
+  switch(p1){
+     case 1:
+       real_pos = servo_set_position(SERVO_CH1, p2); 
+       break;
+     case 2:
+       real_pos = servo_set_position(SERVO_CH2, p2); 
+       break;
+     default:
+       /*outlen = */sprintf(out, "WARN: servo number error. servo:%d value:%d\n", p1, p2);
+       print(out); 
+       break;
+  }
+  if(real_pos!=0){
+    sprintf(out, "set %lu\n", real_pos);
+    print(out);
+  }
+}
+
+
 #include "ragel/servo_command_line.inc"
 
 static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
