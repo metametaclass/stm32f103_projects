@@ -225,7 +225,34 @@ static void usb_print(microrl_t *prl, const char *str)
   print(str);
 }
 
+uint32_t servo_pos_min = SERVO_MIN;
+uint32_t servo_pos_max = SERVO_MAX;
 
+
+//set limits for servo
+static void cli_LIMITS(int p1, int p2)
+{
+  servo_pos_min = p1;
+  servo_pos_max = p2;
+
+  char out[80];
+  sprintf(out, "min:%lu max:%lu\n", servo_pos_min, servo_pos_max);
+  print(out);
+}
+
+
+static void cli_DUMP(void)
+{
+  char out[80];
+  uint32_t pos_ch1 = servo_get_position(SERVO_CH1);
+  uint32_t pos_ch2 = servo_get_position(SERVO_CH2);
+
+  sprintf(out, "ch1:%lu  ch2: %lu min:%lu max:%lu\n ", pos_ch1, pos_ch2, servo_pos_min, servo_pos_max);
+  print(out);
+}
+
+
+//set servo position
 static void cli_SET(int p1, int p2)
 {
   char out[80];
@@ -235,10 +262,10 @@ static void cli_SET(int p1, int p2)
 
   switch(p1){
      case 1:
-       real_pos = servo_set_position(SERVO_CH1, p2); 
+       real_pos = servo_set_position_limits(SERVO_CH1, p2, servo_pos_min, servo_pos_max); 
        break;
      case 2:
-       real_pos = servo_set_position(SERVO_CH2, p2); 
+       real_pos = servo_set_position_limits(SERVO_CH2, p2, servo_pos_min, servo_pos_max); 
        break;
      default:
        /*outlen = */sprintf(out, "WARN: servo number error. servo:%d value:%d\n", p1, p2);
@@ -247,6 +274,31 @@ static void cli_SET(int p1, int p2)
   }
   if(real_pos!=0){
     sprintf(out, "set %lu\n", real_pos);
+    print(out);
+  }
+}
+
+static void cli_ROTATE(int p1, int p2)
+{
+  char out[80];
+  uint32_t real_pos = 0;
+  sprintf(out, "rotate servo:%d angle(ms):%d\n", p1, p2);
+  print(out);
+
+  switch(p1){
+     case 1:
+       real_pos = servo_rotate_limits(SERVO_CH1, p2, servo_pos_min, servo_pos_max); 
+       break;
+     case 2:
+       real_pos = servo_rotate_limits(SERVO_CH2, p2, servo_pos_min, servo_pos_max); 
+       break;
+     default:
+       printf(out, "WARN: servo number error");
+       //print(out); 
+       break;
+  }
+  if(real_pos!=0){
+    sprintf(out, "position %lu\n", real_pos);
     print(out);
   }
 }
