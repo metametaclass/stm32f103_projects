@@ -530,7 +530,7 @@ static void microrl_get_complite (microrl_t * pThis)
 #endif
 
 //*****************************************************************************
-void new_line_handler(microrl_t * pThis){
+static void new_line_handler(microrl_t * pThis){
 	char const * tkn_arr [_COMMAND_TOKEN_NMB];
 	int status;
 
