@@ -5,6 +5,8 @@
 
 void init_usb_cdcacm(void);
 
+void delay(int d);
+
 void usb_poll_loop(void);
 
 #endif

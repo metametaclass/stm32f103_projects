@@ -153,6 +153,15 @@ static int parse_stdin_command(const char *data, int length)
 #endif
         }
 
+        action delay { 
+#ifdef TEST_RAGEL_PARSER
+            printf("DELAY %d\n", params[0]);
+#else            
+            delay(params[0]);
+#endif
+        }
+
+
         action unknown_command { 
             if(start<fpc){
 #ifdef TEST_RAGEL_PARSER
@@ -201,6 +210,7 @@ static int parse_stdin_command(const char *data, int length)
                  ( "rotate"  space* '(' param_numeric ',' param_numeric ')' @rotate space* ) |
                  ( "bon"  @blink_on space* )  | 
                  ( "boff"  @blink_off space* )  | 
+                 ( "delay" space* '(' param_numeric ')'  @delay space* )  | 
                  ( "limits"  space* '(' param_numeric ',' param_numeric ')' @limits space* ) |
                  ( "dump"  @dump space* )  | 
                  ( ( "//" any*) %comment)                 

@@ -194,6 +194,23 @@ static int cdcacm_control_request(usbd_device *usbd_dev, struct usb_setup_data *
   return 0;
 }
 
+
+/**
+ * Delay by executing some "nop"s.
+ *
+ * @param[in] d number of "nop"s to perform.
+ */
+void delay(int d)
+{
+
+     int i;
+
+     for(i = 0; i < d; i++) {
+          __asm("nop");
+     }
+}
+
+
 //readline and usbdev ptr struct
 typedef struct usb_command_line_s {
   microrl_t readline;

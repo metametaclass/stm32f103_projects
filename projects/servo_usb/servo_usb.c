@@ -34,21 +34,6 @@ static void clock_init(void)
 
 
 
-/**
- * Delay by executing some "nop"s.
- *
- * @param[in] d number of "nop"s to performe.
- */
-static void delay(int d)
-{
-
-     int i;
-
-     for(i = 0; i < d; i++) {
-          __asm("nop");
-     }
-}
-
 static void set_servos(uint32_t pos1_us, uint32_t pos2_us)
 {
      gpio_toggle(GPIOC, GPIO13); /* LED on/off */   
