@@ -75,4 +75,13 @@ void servo_init(void);
  */
 uint32_t servo_set_position(enum tim_oc_id ch, uint32_t pos_us);
 
+
+uint32_t servo_set_position_limits(enum tim_oc_id ch, uint32_t pos_us, uint32_t min, uint32_t max);
+
+
+uint32_t servo_rotate_limits(enum tim_oc_id ch, int delta, uint32_t min, uint32_t max);
+
+
+uint32_t servo_get_position(enum tim_oc_id ch);
+
 #endif

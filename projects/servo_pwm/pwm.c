@@ -68,6 +68,32 @@ void pwm_set_pulse_width(uint32_t timer_peripheral, enum tim_oc_id oc_id, uint32
      timer_set_oc_value(timer_peripheral, oc_id, pulse_width);
 }
 
+static uint32_t timer_get_oc_value(uint32_t timer_peripheral, enum tim_oc_id oc_id)
+{
+     switch (oc_id) {
+     case TIM_OC1:
+       return TIM_CCR1(timer_peripheral);
+     case TIM_OC2:
+       return TIM_CCR2(timer_peripheral);
+     case TIM_OC3:
+       return TIM_CCR3(timer_peripheral);
+     case TIM_OC4:
+       return TIM_CCR4(timer_peripheral);
+     case TIM_OC1N:
+     case TIM_OC2N:
+     case TIM_OC3N:
+       /* Ignoring as this option applies to the whole channel. */
+       break;
+     }
+     return 0;
+}
+
+
+uint32_t pwm_get_pulse_width(uint32_t timer_peripheral, enum tim_oc_id oc_id)
+{
+     return timer_get_oc_value(timer_peripheral, oc_id);
+}
+
 void pwm_start_timer(uint32_t timer_peripheral)
 {
      timer_enable_counter(timer_peripheral);

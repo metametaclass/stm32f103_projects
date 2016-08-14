@@ -57,13 +57,18 @@ void pwm_init_output_channel(uint32_t timer_peripheral, enum tim_oc_id oc_id, vo
 void pwm_start_timer(uint32_t timer_peripheral);
 
 /**
- * Set the puls width (duty cycle) of the PWMi for a channel. Could by called any time to adjust the period dynamically for a channel.
+ * Set the pulse width (duty cycle) of the PWMi for a channel. Could by called any time to adjust the period dynamically for a channel.
  *
  * @param[in]	timer_peripheral	The timer for which the output channel is to be set. E.g. TIM2.
  * @param[in]	oc_id			The ID of the timmers output channel. E.g. TIM_OC1.
- * @param[in]	pulse_widht		The pulse with for the channel. Must be between 0 (off) and the value given for period
+ * @param[in]	pulse_width		The pulse with for the channel. Must be between 0 (off) and the value given for period
  * 							with {@link pwm_init_timer}.
  */
 void pwm_set_pulse_width(uint32_t timer_peripheral, enum tim_oc_id oc_id, uint32_t pulse_width);
+
+/**
+ * Get pulse width from timer
+ */
+uint32_t pwm_get_pulse_width(uint32_t timer_peripheral, enum tim_oc_id oc_id);
 
 #endif

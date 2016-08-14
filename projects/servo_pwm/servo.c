@@ -42,16 +42,36 @@ void servo_init(void)
      pwm_start_timer(TIM2);
 }
 
-uint32_t servo_set_position(enum tim_oc_id ch, uint32_t pos_us)
+uint32_t servo_set_position_limits(enum tim_oc_id ch, uint32_t pos_us, uint32_t min, uint32_t max)
 {
-     if(pos_us < SERVO_MIN){
-       pos_us = SERVO_MIN;
+     if(pos_us < min){
+       pos_us = min;
      }
-     if(pos_us > SERVO_MAX){
-       pos_us = SERVO_MAX;
+     if(pos_us > max){
+       pos_us = max;
      }
 
      pwm_set_pulse_width(TIM2, ch, pos_us);
      return pos_us;
+
 }
 
+uint32_t servo_set_position(enum tim_oc_id ch, uint32_t pos_us)
+{
+     return servo_set_position_limits(ch, pos_us, SERVO_MIN, SERVO_MAX);  
+}
+
+
+
+uint32_t servo_rotate_limits(enum tim_oc_id ch, int delta, uint32_t min, uint32_t max)
+{
+     uint32_t pos_us =  pwm_get_pulse_width(TIM2, ch) + delta;
+
+     return servo_set_position_limits(ch, pos_us, min, max);
+}
+
+
+uint32_t servo_get_position(enum tim_oc_id ch)
+{
+     return pwm_get_pulse_width(TIM2, ch);
+}
