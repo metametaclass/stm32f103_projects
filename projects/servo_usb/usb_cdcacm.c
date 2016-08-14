@@ -206,6 +206,9 @@ static usb_command_line_t usb_cmd_line;
 
 static void usb_printn(const char *str, size_t len)
 {
+  if(len==0){
+    return;
+  }
   while (usbd_ep_write_packet(usb_cmd_line.usbd_dev, 0x82, str, len) == 0);
 }
 
@@ -259,7 +262,7 @@ static void cli_DUMP(void)
   uint32_t pos_ch1 = servo_get_position(SERVO_CH1);
   uint32_t pos_ch2 = servo_get_position(SERVO_CH2);
 
-  sprintf(out, "ch1:%lu  ch2: %lu min:%lu max:%lu\n ", pos_ch1, pos_ch2, servo_pos_min, servo_pos_max);
+  sprintf(out, "ch1:%lu  ch2: %lu min:%lu max:%lu\n", pos_ch1, pos_ch2, servo_pos_min, servo_pos_max);
   print(out);
 }
 
