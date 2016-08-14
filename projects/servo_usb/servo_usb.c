@@ -19,9 +19,9 @@
 
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
-#include <libopencm3/cm3/nvic.h>
 
 #include "../servo_pwm/servo.h"
+#include "blink.h"
 #include "usb_cdcacm.h"
 
 /**
@@ -32,19 +32,7 @@ static void clock_init(void)
      rcc_clock_setup_in_hse_8mhz_out_72mhz();
 }
 
-/**
- * Initialize the GPIO port for the LED at pin 13 on port C.
- */
-static void gpio_init(void)
-{
-     /* enable GPIOC clock */
-     //rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPCEN);
-     rcc_periph_clock_enable(RCC_GPIOC);
-     /*
-      * set GPIO13 at PORTC (led) to 'output alternate function push-pull'.
-      */
-     gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, GPIO13);
-}
+
 
 /**
  * Delay by executing some "nop"s.
@@ -70,34 +58,6 @@ static void set_servos(uint32_t pos1_us, uint32_t pos2_us)
 }
 
 
-void tim3_isr(void)
-{
-  if (timer_get_flag(TIM3, TIM_SR_UIF)) {
-    gpio_toggle(GPIOC, GPIO13);   // LEDon/off.    
-    timer_clear_flag(TIM3, TIM_SR_UIF);
-  }
-}
-
-static void tim3_init(void)
-{
-
-     nvic_enable_irq(NVIC_TIM3_IRQ);
-     nvic_set_priority(NVIC_TIM3_IRQ, 1);
-     
-     rcc_periph_clock_enable(RCC_TIM3);
-
-     timer_set_prescaler(TIM3, 1439);
-
-     timer_set_period(TIM3, 25000);
-
-      /* Update interrupt enable. */
-     timer_enable_irq(TIM3, TIM_DIER_UIE);
-
-     /* Start timer. */
-     timer_enable_counter(TIM3);
-
-}
-
 
 int main(void)
 {
@@ -105,31 +65,18 @@ int main(void)
      //usbd_device* usbd_dev;
 
      clock_init();
-     gpio_init();
+
      servo_init();
 
      //init timer 3 interrupts
-     tim3_init(); 
-
-
-     //gpio_set(GPIOC, GPIO13);
-     //delay(1500000);
-     //gpio_clear(GPIOC, GPIO13);  
-     /*
-     for(i=0;i<50;i++){
-       gpio_toggle(GPIOC, GPIO13); // LED on/off 
-       delay(1500000);
-     }*/
-
-
+     blink_init(); 
 
      set_servos(SERVO_NULL, SERVO_NULL);
 
      init_usb_cdcacm();
 
      gpio_clear(GPIOC, GPIO13);
-     for (i = 0; i < 0x800000; i++)
-       __asm__("nop");
+     delay(0x800000);
      gpio_set(GPIOC, GPIO13);  
 
      usb_poll_loop();

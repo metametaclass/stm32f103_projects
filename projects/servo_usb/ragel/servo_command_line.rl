@@ -13,9 +13,9 @@
 }%%
 
 #ifdef TEST_RAGEL_PARSER
-static int parse_stdin_command(char *data, int length)
+static int parse_stdin_command(const char *data, int length)
 #else
-static int parse_stdin_command(usb_device *usbd_dev, char *data, int length) 
+static int parse_stdin_command(const char *data, int length) 
 #endif
 {
 
@@ -30,7 +30,7 @@ static int parse_stdin_command(usb_device *usbd_dev, char *data, int length)
 #else
     int p2 = SERVO_NULL;
 #endif
-    int outlen;
+    //int outlen;
     char out[80];
 
 
@@ -74,8 +74,9 @@ static int parse_stdin_command(usb_device *usbd_dev, char *data, int length)
             printf("SET\n");
 #else
             
-            outlen = sprintf(out, "servo:%d value:%d\n", p1, p2);
-            while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
+            /*outlen = */sprintf(out, "servo:%d value:%d\n", p1, p2);
+            print(out);
+            //while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
 
             switch(p1){
                case 1:
@@ -85,11 +86,31 @@ static int parse_stdin_command(usb_device *usbd_dev, char *data, int length)
                  servo_set_position(SERVO_CH2, p2); 
                  break;
                default:
-                 outlen = sprintf(out, "servo:%d value:%d\n", p1, p2);
-                 while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
+                  
+                 /*outlen = */sprintf(out, "WARN: servo number error. servo:%d value:%d\n", p1, p2);
+                 print(out); 
+                 //while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
                  break;
             }
             
+#endif
+        }
+
+        action blink_on { 
+#ifdef TEST_RAGEL_PARSER
+            printf("BLINK_ON\n");
+#else
+            print("blink_on");
+            blink_switch(1);
+#endif
+        }
+
+        action blink_off { 
+#ifdef TEST_RAGEL_PARSER
+            printf("BLINK_OFF\n");
+#else
+            print("blink_off");
+            blink_switch(0);
 #endif
         }
 
@@ -100,7 +121,9 @@ static int parse_stdin_command(usb_device *usbd_dev, char *data, int length)
         param_numeric = space* (digit+ >begin_literal %end_literal) space* ; 
 
 
-        main := (( "set"  space* '(' param_numeric ',' param_numeric ')' @set space* )  |                 
+        main := (( "set"  space* '(' param_numeric ',' param_numeric ')' @set space* )  | 
+                 ( "bon"  @blink_on space* )  | 
+                 ( "boff"  @blink_off space* )  | 
                  ( "//" any*)                 
                 ) $err(error) $eof(on_eof);
                       

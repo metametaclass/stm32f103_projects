@@ -8,6 +8,7 @@
 #include <libopencm3/usb/cdc.h>
 
 #include "usb_cdcacm.h"
+#include "blink.h"
 #include "../servo_pwm/servo.h"
 
 #include "../../libs/microrl/microrl.h"
@@ -195,7 +196,7 @@ static int cdcacm_control_request(usbd_device *usbd_dev, struct usb_setup_data *
 
 //readline and usbdev ptr struct
 typedef struct usb_command_line_s {
-  microrl_t prl;
+  microrl_t readline;
   usbd_device *usbd_dev;
 } usb_command_line_t;
 
@@ -203,33 +204,71 @@ typedef struct usb_command_line_s {
 
 static usb_command_line_t usb_cmd_line;
 
+static void usb_printn(const char *str, size_t len)
+{
+  while (usbd_ep_write_packet(usb_cmd_line.usbd_dev, 0x82, str, len) == 0);
+}
 
-//#include "ragel/servo_command_line.inc"
+
+static void print(const char *str)
+{
+  size_t len = strlen(str);  
+
+  usb_printn(str, len);
+}
+
+
+static void usb_print(microrl_t *prl, const char *str)
+{
+  (void) prl;
+  
+  print(str);
+}
+
+
+#include "ragel/servo_command_line.inc"
 
 static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 {
   (void)ep;
   (void)usbd_dev;
-  int i, outlen;
+  int i;
+  //int outlen;
   char buf[64];
-  char out[10];
+  //char out[10];
 
   int len = usbd_ep_read_packet(usbd_dev, 0x01, buf, 64);
 
   if (len) {
     for(i=0;i<len;i++){
-      memset(out, 0, sizeof(out));
-      outlen = sprintf(out, "%d\n", (int)buf[i]);
-      while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
+      //memset(out, 0, sizeof(out));
+      //outlen = sprintf(out, "%d\n", (int)buf[i]);
+      //while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
+      microrl_insert_char (&usb_cmd_line.readline, buf[i]);
     } 
-    //TODO: use readline with global buffer and \r\n eol
-    //parse_stdin_command(usbd_dev, buf, len);        
     //servo_set_position(SERVO_CH1, SERVO_NULL);
   }
-
-  gpio_toggle(GPIOC, GPIO13);
+  
 }
 
+
+
+
+
+
+static void execute_cmd_line(microrl_t *prl, int argc, const char * const * argv)
+{
+  (void) prl;
+  (void) argc;
+  (void) argv;
+  int i;
+  //gpio_toggle(GPIOC, GPIO13);
+  for(i=0;i<argc;i++){
+    if(argv[i]) {
+      parse_stdin_command(argv[i], strlen(argv[i]));
+    }
+  }
+}
 
 static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 {
@@ -250,6 +289,8 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 
 void init_usb_cdcacm(void)
 {
+  microrl_init (&usb_cmd_line.readline, usb_print);
+  microrl_set_execute_callback (&usb_cmd_line.readline, execute_cmd_line);
 
   usb_cmd_line.usbd_dev = usbd_init(&st_usbfs_v1_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
   usbd_register_set_config_callback(usb_cmd_line.usbd_dev, cdcacm_set_config);
