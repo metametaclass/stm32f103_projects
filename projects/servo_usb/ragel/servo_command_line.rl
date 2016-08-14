@@ -32,6 +32,7 @@ static int parse_stdin_command(const char *data, int length)
     const char *start = data;
 
     int tmp;
+    int sign = 1;
    
     int params[MAX_CALL_PARAMS] = {0};
     int param_num = 0;
@@ -46,6 +47,7 @@ static int parse_stdin_command(const char *data, int length)
 #else
 #endif
             start = fpc;
+            //sign = 1;
         }
 
         action start { 
@@ -64,6 +66,23 @@ static int parse_stdin_command(const char *data, int length)
 #endif
         }      
 
+        action signed {
+#ifdef TEST_RAGEL_PARSER
+            printf(">>signed: %ld \"%.*s\"\n", fpc-data, (int)(fpc-start), start); 
+#else
+#endif
+            sign = -1;
+        }
+
+        action reset_sign {
+#ifdef TEST_RAGEL_PARSER
+            printf(">>reset_sign: %ld \"%.*s\"\n", fpc-data, (int)(fpc-start), start); 
+#else
+#endif
+            sign = 1;
+        }
+
+
         action end_numeric { 
 #ifdef TEST_RAGEL_PARSER
             printf(">>end_numeric: %ld \"%.*s\"\n", fpc-data, (int)(fpc-start), start); 
@@ -75,7 +94,7 @@ static int parse_stdin_command(const char *data, int length)
                start++;
             }
             if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
+               params[param_num] = sign*tmp;
                param_num++;
             }
 #ifdef TEST_RAGEL_PARSER
@@ -174,7 +193,7 @@ static int parse_stdin_command(const char *data, int length)
         str_literal = '"' ((any - '"')** >begin_literal %end_literal)  '"' ;
         param = space* str_literal space* ;
 
-        param_numeric = space* (digit+ >begin_literal %end_numeric) space* ; 
+        param_numeric = space* ( (('-' @signed)? >reset_sign) digit+ >begin_literal %end_numeric) space* ; 
 
         # | ( (any*) %unknown_command )
 

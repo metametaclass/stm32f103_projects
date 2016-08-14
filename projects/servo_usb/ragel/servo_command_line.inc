@@ -13,7 +13,7 @@
 
 /* #line 15 "servo_command_line.inc" */
 static const int servo_command_line_start = 1;
-static const int servo_command_line_first_final = 42;
+static const int servo_command_line_first_final = 48;
 static const int servo_command_line_error = 0;
 
 static const int servo_command_line_en_main = 1;
@@ -41,6 +41,7 @@ static int parse_stdin_command(const char *data, int length)
     const char *start = data;
 
     int tmp;
+    int sign = 1;
    
     int params[MAX_CALL_PARAMS] = {0};
     int param_num = 0;
@@ -48,12 +49,12 @@ static int parse_stdin_command(const char *data, int length)
     int cs;
 
     
-/* #line 52 "servo_command_line.inc" */
+/* #line 53 "servo_command_line.inc" */
 	{
 	cs = servo_command_line_start;
 	}
 
-/* #line 57 "servo_command_line.inc" */
+/* #line 58 "servo_command_line.inc" */
 	{
 	if ( p == pe )
 		goto _test_eof;
@@ -65,12 +66,12 @@ case 1:
 		case 98: goto st3;
 		case 100: goto st6;
 		case 108: goto st9;
-		case 114: goto st21;
-		case 115: goto st33;
+		case 114: goto st23;
+		case 115: goto st37;
 	}
 	goto tr0;
 tr0:
-/* #line 88 "servo_command_line.rl" */
+/* #line 107 "servo_command_line.rl" */
 	{ 
 #ifndef TEST_RAGEL_PARSER
             printf("error at %d %s\n", (int)(p-start), p); 
@@ -78,7 +79,7 @@ tr0:
             return 0;
         }
 	goto st0;
-/* #line 82 "servo_command_line.inc" */
+/* #line 83 "servo_command_line.inc" */
 st0:
 cs = 0;
 	goto _out;
@@ -87,13 +88,13 @@ st2:
 		goto _test_eof2;
 case 2:
 	if ( (*p) == 47 )
-		goto st42;
+		goto st48;
 	goto tr0;
-st42:
+st48:
 	if ( ++p == pe )
-		goto _test_eof42;
-case 42:
-	goto st42;
+		goto _test_eof48;
+case 48:
+	goto st48;
 st3:
 	if ( ++p == pe )
 		goto _test_eof3;
@@ -118,7 +119,7 @@ case 5:
 		goto tr11;
 	goto tr0;
 tr10:
-/* #line 155 "servo_command_line.rl" */
+/* #line 174 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_ON\n");
@@ -127,9 +128,9 @@ tr10:
             blink_switch(1);
 #endif
         }
-	goto st43;
+	goto st49;
 tr11:
-/* #line 164 "servo_command_line.rl" */
+/* #line 183 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_OFF\n");
@@ -138,9 +139,9 @@ tr11:
             blink_switch(0);
 #endif
         }
-	goto st43;
+	goto st49;
 tr14:
-/* #line 111 "servo_command_line.rl" */
+/* #line 130 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf("DUMP\n");
@@ -149,9 +150,9 @@ tr14:
             cli_DUMP();            
 #endif
         }
-	goto st43;
-tr29:
-/* #line 67 "servo_command_line.rl" */
+	goto st49;
+tr33:
+/* #line 86 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
@@ -163,7 +164,89 @@ tr29:
                start++;
             }
             if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
+               params[param_num] = sign*tmp;
+               param_num++;
+            }
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+#endif
+
+        }
+/* #line 139 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("LIMITS %d %d\n", params[0], params[1]);
+#else
+            
+            cli_LIMITS(params[0], params[1]);                        
+#endif
+        }
+	goto st49;
+tr36:
+/* #line 139 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("LIMITS %d %d\n", params[0], params[1]);
+#else
+            
+            cli_LIMITS(params[0], params[1]);                        
+#endif
+        }
+	goto st49;
+tr55:
+/* #line 86 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+            for_debug(); 
+#endif
+            tmp = 0;
+            while(start<p){
+               tmp = tmp*10 + (*start - '0');
+               start++;
+            }
+            if(param_num<MAX_CALL_PARAMS){
+               params[param_num] = sign*tmp;
+               param_num++;
+            }
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+#endif
+
+        }
+/* #line 148 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("ROTATE %d %d\n", params[0], params[1]);
+#else            
+            cli_ROTATE(params[0], params[1]);
+#endif
+        }
+	goto st49;
+tr58:
+/* #line 148 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("ROTATE %d %d\n", params[0], params[1]);
+#else            
+            cli_ROTATE(params[0], params[1]);
+#endif
+        }
+	goto st49;
+tr74:
+/* #line 86 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+            for_debug(); 
+#endif
+            tmp = 0;
+            while(start<p){
+               tmp = tmp*10 + (*start - '0');
+               start++;
+            }
+            if(param_num<MAX_CALL_PARAMS){
+               params[param_num] = sign*tmp;
                param_num++;
             }
 #ifdef TEST_RAGEL_PARSER
@@ -174,88 +257,18 @@ tr29:
 /* #line 120 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
-            printf("LIMITS %d %d\n", params[0], params[1]);
+            printf("SET %d %d\n", params[0], params[1]);
 #else
             
-            cli_LIMITS(params[0], params[1]);                        
+            cli_SET(params[0], params[1]);
+            
 #endif
         }
-	goto st43;
-tr32:
+	goto st49;
+tr77:
 /* #line 120 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
-            printf("LIMITS %d %d\n", params[0], params[1]);
-#else
-            
-            cli_LIMITS(params[0], params[1]);                        
-#endif
-        }
-	goto st43;
-tr47:
-/* #line 67 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
-            for_debug(); 
-#endif
-            tmp = 0;
-            while(start<p){
-               tmp = tmp*10 + (*start - '0');
-               start++;
-            }
-            if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
-               param_num++;
-            }
-#ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %d %d\n", param_num, tmp); 
-#endif
-
-        }
-/* #line 129 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf("ROTATE %d %d\n", params[0], params[1]);
-#else            
-            cli_ROTATE(params[0], params[1]);
-#endif
-        }
-	goto st43;
-tr50:
-/* #line 129 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf("ROTATE %d %d\n", params[0], params[1]);
-#else            
-            cli_ROTATE(params[0], params[1]);
-#endif
-        }
-	goto st43;
-tr62:
-/* #line 67 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
-            for_debug(); 
-#endif
-            tmp = 0;
-            while(start<p){
-               tmp = tmp*10 + (*start - '0');
-               start++;
-            }
-            if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
-               param_num++;
-            }
-#ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %d %d\n", param_num, tmp); 
-#endif
-
-        }
-/* #line 101 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
             printf("SET %d %d\n", params[0], params[1]);
 #else
             
@@ -263,28 +276,16 @@ tr62:
             
 #endif
         }
-	goto st43;
-tr65:
-/* #line 101 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf("SET %d %d\n", params[0], params[1]);
-#else
-            
-            cli_SET(params[0], params[1]);
-            
-#endif
-        }
-	goto st43;
-st43:
+	goto st49;
+st49:
 	if ( ++p == pe )
-		goto _test_eof43;
-case 43:
-/* #line 284 "servo_command_line.inc" */
+		goto _test_eof49;
+case 49:
+/* #line 285 "servo_command_line.inc" */
 	if ( (*p) == 32 )
-		goto st43;
+		goto st49;
 	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st43;
+		goto st49;
 	goto tr0;
 st6:
 	if ( ++p == pe )
@@ -357,75 +358,89 @@ st15:
 	if ( ++p == pe )
 		goto _test_eof15;
 case 15:
-	if ( (*p) == 32 )
-		goto st15;
+	switch( (*p) ) {
+		case 32: goto st15;
+		case 45: goto tr21;
+	}
 	if ( (*p) > 13 ) {
 		if ( 48 <= (*p) && (*p) <= 57 )
-			goto tr21;
+			goto tr22;
 	} else if ( (*p) >= 9 )
 		goto st15;
 	goto tr0;
 tr21:
-/* #line 43 "servo_command_line.rl" */
-	{ 
+/* #line 77 "servo_command_line.rl" */
+	{
 #ifdef TEST_RAGEL_PARSER
-            printf("begin_literal: %ld\n", p-data); 
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
 #else
 #endif
-            start = p;
+            sign = 1;
+        }
+/* #line 69 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>signed: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = -1;
         }
 	goto st16;
 st16:
 	if ( ++p == pe )
 		goto _test_eof16;
 case 16:
-/* #line 383 "servo_command_line.inc" */
-	switch( (*p) ) {
-		case 32: goto tr22;
-		case 44: goto tr23;
-	}
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st16;
-	} else if ( (*p) >= 9 )
-		goto tr22;
+/* #line 394 "servo_command_line.inc" */
+	if ( 48 <= (*p) && (*p) <= 57 )
+		goto tr23;
 	goto tr0;
 tr22:
-/* #line 67 "servo_command_line.rl" */
+/* #line 77 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = 1;
+        }
+/* #line 44 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
-            for_debug(); 
+            printf("begin_literal: %ld\n", p-data); 
+#else
 #endif
-            tmp = 0;
-            while(start<p){
-               tmp = tmp*10 + (*start - '0');
-               start++;
-            }
-            if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
-               param_num++;
-            }
+            start = p;
+            //sign = 1;
+        }
+	goto st17;
+tr23:
+/* #line 44 "servo_command_line.rl" */
+	{ 
 #ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+            printf("begin_literal: %ld\n", p-data); 
+#else
 #endif
-
+            start = p;
+            //sign = 1;
         }
 	goto st17;
 st17:
 	if ( ++p == pe )
 		goto _test_eof17;
 case 17:
-/* #line 420 "servo_command_line.inc" */
+/* #line 432 "servo_command_line.inc" */
 	switch( (*p) ) {
-		case 32: goto st17;
-		case 44: goto st18;
+		case 32: goto tr24;
+		case 44: goto tr25;
 	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st17;
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st17;
+	} else if ( (*p) >= 9 )
+		goto tr24;
 	goto tr0;
-tr23:
-/* #line 67 "servo_command_line.rl" */
+tr24:
+/* #line 86 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
@@ -437,7 +452,7 @@ tr23:
                start++;
             }
             if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
+               params[param_num] = sign*tmp;
                param_num++;
             }
 #ifdef TEST_RAGEL_PARSER
@@ -450,42 +465,16 @@ st18:
 	if ( ++p == pe )
 		goto _test_eof18;
 case 18:
-/* #line 454 "servo_command_line.inc" */
-	if ( (*p) == 32 )
-		goto st18;
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto tr27;
-	} else if ( (*p) >= 9 )
-		goto st18;
-	goto tr0;
-tr27:
-/* #line 43 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf("begin_literal: %ld\n", p-data); 
-#else
-#endif
-            start = p;
-        }
-	goto st19;
-st19:
-	if ( ++p == pe )
-		goto _test_eof19;
-case 19:
-/* #line 477 "servo_command_line.inc" */
+/* #line 469 "servo_command_line.inc" */
 	switch( (*p) ) {
-		case 32: goto tr28;
-		case 41: goto tr29;
+		case 32: goto st18;
+		case 44: goto st19;
 	}
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st19;
-	} else if ( (*p) >= 9 )
-		goto tr28;
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st18;
 	goto tr0;
-tr28:
-/* #line 67 "servo_command_line.rl" */
+tr25:
+/* #line 86 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
@@ -497,7 +486,7 @@ tr28:
                start++;
             }
             if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
+               params[param_num] = sign*tmp;
                param_num++;
             }
 #ifdef TEST_RAGEL_PARSER
@@ -505,38 +494,132 @@ tr28:
 #endif
 
         }
+	goto st19;
+st19:
+	if ( ++p == pe )
+		goto _test_eof19;
+case 19:
+/* #line 503 "servo_command_line.inc" */
+	switch( (*p) ) {
+		case 32: goto st19;
+		case 45: goto tr29;
+	}
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto tr30;
+	} else if ( (*p) >= 9 )
+		goto st19;
+	goto tr0;
+tr29:
+/* #line 77 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = 1;
+        }
+/* #line 69 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>signed: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = -1;
+        }
 	goto st20;
 st20:
 	if ( ++p == pe )
 		goto _test_eof20;
 case 20:
-/* #line 514 "servo_command_line.inc" */
-	switch( (*p) ) {
-		case 32: goto st20;
-		case 41: goto tr32;
-	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st20;
+/* #line 536 "servo_command_line.inc" */
+	if ( 48 <= (*p) && (*p) <= 57 )
+		goto tr31;
 	goto tr0;
+tr30:
+/* #line 77 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = 1;
+        }
+/* #line 44 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("begin_literal: %ld\n", p-data); 
+#else
+#endif
+            start = p;
+            //sign = 1;
+        }
+	goto st21;
+tr31:
+/* #line 44 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("begin_literal: %ld\n", p-data); 
+#else
+#endif
+            start = p;
+            //sign = 1;
+        }
+	goto st21;
 st21:
 	if ( ++p == pe )
 		goto _test_eof21;
 case 21:
-	if ( (*p) == 111 )
-		goto st22;
+/* #line 574 "servo_command_line.inc" */
+	switch( (*p) ) {
+		case 32: goto tr32;
+		case 41: goto tr33;
+	}
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st21;
+	} else if ( (*p) >= 9 )
+		goto tr32;
 	goto tr0;
+tr32:
+/* #line 86 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+            for_debug(); 
+#endif
+            tmp = 0;
+            while(start<p){
+               tmp = tmp*10 + (*start - '0');
+               start++;
+            }
+            if(param_num<MAX_CALL_PARAMS){
+               params[param_num] = sign*tmp;
+               param_num++;
+            }
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+#endif
+
+        }
+	goto st22;
 st22:
 	if ( ++p == pe )
 		goto _test_eof22;
 case 22:
-	if ( (*p) == 116 )
-		goto st23;
+/* #line 611 "servo_command_line.inc" */
+	switch( (*p) ) {
+		case 32: goto st22;
+		case 41: goto tr36;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st22;
 	goto tr0;
 st23:
 	if ( ++p == pe )
 		goto _test_eof23;
 case 23:
-	if ( (*p) == 97 )
+	if ( (*p) == 111 )
 		goto st24;
 	goto tr0;
 st24:
@@ -550,144 +633,112 @@ st25:
 	if ( ++p == pe )
 		goto _test_eof25;
 case 25:
-	if ( (*p) == 101 )
+	if ( (*p) == 97 )
 		goto st26;
 	goto tr0;
 st26:
 	if ( ++p == pe )
 		goto _test_eof26;
 case 26:
-	switch( (*p) ) {
-		case 32: goto st26;
-		case 40: goto st27;
-	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st26;
+	if ( (*p) == 116 )
+		goto st27;
 	goto tr0;
 st27:
 	if ( ++p == pe )
 		goto _test_eof27;
 case 27:
-	if ( (*p) == 32 )
-		goto st27;
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto tr39;
-	} else if ( (*p) >= 9 )
-		goto st27;
+	if ( (*p) == 101 )
+		goto st28;
 	goto tr0;
-tr39:
-/* #line 43 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf("begin_literal: %ld\n", p-data); 
-#else
-#endif
-            start = p;
-        }
-	goto st28;
 st28:
 	if ( ++p == pe )
 		goto _test_eof28;
 case 28:
-/* #line 594 "servo_command_line.inc" */
 	switch( (*p) ) {
-		case 32: goto tr40;
-		case 44: goto tr41;
+		case 32: goto st28;
+		case 40: goto st29;
 	}
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st28;
-	} else if ( (*p) >= 9 )
-		goto tr40;
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st28;
 	goto tr0;
-tr40:
-/* #line 67 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
-            for_debug(); 
-#endif
-            tmp = 0;
-            while(start<p){
-               tmp = tmp*10 + (*start - '0');
-               start++;
-            }
-            if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
-               param_num++;
-            }
-#ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %d %d\n", param_num, tmp); 
-#endif
-
-        }
-	goto st29;
 st29:
 	if ( ++p == pe )
 		goto _test_eof29;
 case 29:
-/* #line 631 "servo_command_line.inc" */
 	switch( (*p) ) {
 		case 32: goto st29;
-		case 44: goto st30;
+		case 45: goto tr43;
 	}
-	if ( 9 <= (*p) && (*p) <= 13 )
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto tr44;
+	} else if ( (*p) >= 9 )
 		goto st29;
 	goto tr0;
-tr41:
-/* #line 67 "servo_command_line.rl" */
-	{ 
+tr43:
+/* #line 77 "servo_command_line.rl" */
+	{
 #ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
-            for_debug(); 
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
 #endif
-            tmp = 0;
-            while(start<p){
-               tmp = tmp*10 + (*start - '0');
-               start++;
-            }
-            if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
-               param_num++;
-            }
+            sign = 1;
+        }
+/* #line 69 "servo_command_line.rl" */
+	{
 #ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+            printf(">>signed: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
 #endif
-
+            sign = -1;
         }
 	goto st30;
 st30:
 	if ( ++p == pe )
 		goto _test_eof30;
 case 30:
-/* #line 665 "servo_command_line.inc" */
-	if ( (*p) == 32 )
-		goto st30;
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto tr45;
-	} else if ( (*p) >= 9 )
-		goto st30;
+/* #line 701 "servo_command_line.inc" */
+	if ( 48 <= (*p) && (*p) <= 57 )
+		goto tr45;
 	goto tr0;
-tr45:
-/* #line 43 "servo_command_line.rl" */
+tr44:
+/* #line 77 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = 1;
+        }
+/* #line 44 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf("begin_literal: %ld\n", p-data); 
 #else
 #endif
             start = p;
+            //sign = 1;
+        }
+	goto st31;
+tr45:
+/* #line 44 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("begin_literal: %ld\n", p-data); 
+#else
+#endif
+            start = p;
+            //sign = 1;
         }
 	goto st31;
 st31:
 	if ( ++p == pe )
 		goto _test_eof31;
 case 31:
-/* #line 688 "servo_command_line.inc" */
+/* #line 739 "servo_command_line.inc" */
 	switch( (*p) ) {
 		case 32: goto tr46;
-		case 41: goto tr47;
+		case 44: goto tr47;
 	}
 	if ( (*p) > 13 ) {
 		if ( 48 <= (*p) && (*p) <= 57 )
@@ -696,7 +747,7 @@ case 31:
 		goto tr46;
 	goto tr0;
 tr46:
-/* #line 67 "servo_command_line.rl" */
+/* #line 86 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
@@ -708,7 +759,7 @@ tr46:
                start++;
             }
             if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
+               params[param_num] = sign*tmp;
                param_num++;
             }
 #ifdef TEST_RAGEL_PARSER
@@ -721,211 +772,449 @@ st32:
 	if ( ++p == pe )
 		goto _test_eof32;
 case 32:
-/* #line 725 "servo_command_line.inc" */
+/* #line 776 "servo_command_line.inc" */
 	switch( (*p) ) {
 		case 32: goto st32;
-		case 41: goto tr50;
+		case 44: goto st33;
 	}
 	if ( 9 <= (*p) && (*p) <= 13 )
 		goto st32;
 	goto tr0;
+tr47:
+/* #line 86 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+            for_debug(); 
+#endif
+            tmp = 0;
+            while(start<p){
+               tmp = tmp*10 + (*start - '0');
+               start++;
+            }
+            if(param_num<MAX_CALL_PARAMS){
+               params[param_num] = sign*tmp;
+               param_num++;
+            }
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+#endif
+
+        }
+	goto st33;
 st33:
 	if ( ++p == pe )
 		goto _test_eof33;
 case 33:
-	if ( (*p) == 101 )
-		goto st34;
+/* #line 810 "servo_command_line.inc" */
+	switch( (*p) ) {
+		case 32: goto st33;
+		case 45: goto tr51;
+	}
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto tr52;
+	} else if ( (*p) >= 9 )
+		goto st33;
 	goto tr0;
+tr51:
+/* #line 77 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = 1;
+        }
+/* #line 69 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>signed: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = -1;
+        }
+	goto st34;
 st34:
 	if ( ++p == pe )
 		goto _test_eof34;
 case 34:
-	if ( (*p) == 116 )
-		goto st35;
+/* #line 843 "servo_command_line.inc" */
+	if ( 48 <= (*p) && (*p) <= 57 )
+		goto tr53;
 	goto tr0;
+tr52:
+/* #line 77 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = 1;
+        }
+/* #line 44 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("begin_literal: %ld\n", p-data); 
+#else
+#endif
+            start = p;
+            //sign = 1;
+        }
+	goto st35;
+tr53:
+/* #line 44 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("begin_literal: %ld\n", p-data); 
+#else
+#endif
+            start = p;
+            //sign = 1;
+        }
+	goto st35;
 st35:
 	if ( ++p == pe )
 		goto _test_eof35;
 case 35:
+/* #line 881 "servo_command_line.inc" */
 	switch( (*p) ) {
-		case 32: goto st35;
-		case 40: goto st36;
+		case 32: goto tr54;
+		case 41: goto tr55;
 	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st35;
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st35;
+	} else if ( (*p) >= 9 )
+		goto tr54;
 	goto tr0;
+tr54:
+/* #line 86 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+            for_debug(); 
+#endif
+            tmp = 0;
+            while(start<p){
+               tmp = tmp*10 + (*start - '0');
+               start++;
+            }
+            if(param_num<MAX_CALL_PARAMS){
+               params[param_num] = sign*tmp;
+               param_num++;
+            }
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+#endif
+
+        }
+	goto st36;
 st36:
 	if ( ++p == pe )
 		goto _test_eof36;
 case 36:
-	if ( (*p) == 32 )
-		goto st36;
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto tr54;
-	} else if ( (*p) >= 9 )
+/* #line 918 "servo_command_line.inc" */
+	switch( (*p) ) {
+		case 32: goto st36;
+		case 41: goto tr58;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
 		goto st36;
 	goto tr0;
-tr54:
-/* #line 43 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf("begin_literal: %ld\n", p-data); 
-#else
-#endif
-            start = p;
-        }
-	goto st37;
 st37:
 	if ( ++p == pe )
 		goto _test_eof37;
 case 37:
-/* #line 784 "servo_command_line.inc" */
-	switch( (*p) ) {
-		case 32: goto tr55;
-		case 44: goto tr56;
-	}
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st37;
-	} else if ( (*p) >= 9 )
-		goto tr55;
+	if ( (*p) == 101 )
+		goto st38;
 	goto tr0;
-tr55:
-/* #line 67 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
-            for_debug(); 
-#endif
-            tmp = 0;
-            while(start<p){
-               tmp = tmp*10 + (*start - '0');
-               start++;
-            }
-            if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
-               param_num++;
-            }
-#ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %d %d\n", param_num, tmp); 
-#endif
-
-        }
-	goto st38;
 st38:
 	if ( ++p == pe )
 		goto _test_eof38;
 case 38:
-/* #line 821 "servo_command_line.inc" */
-	switch( (*p) ) {
-		case 32: goto st38;
-		case 44: goto st39;
-	}
-	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st38;
+	if ( (*p) == 116 )
+		goto st39;
 	goto tr0;
-tr56:
-/* #line 67 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
-            for_debug(); 
-#endif
-            tmp = 0;
-            while(start<p){
-               tmp = tmp*10 + (*start - '0');
-               start++;
-            }
-            if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
-               param_num++;
-            }
-#ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %d %d\n", param_num, tmp); 
-#endif
-
-        }
-	goto st39;
 st39:
 	if ( ++p == pe )
 		goto _test_eof39;
 case 39:
-/* #line 855 "servo_command_line.inc" */
-	if ( (*p) == 32 )
-		goto st39;
-	if ( (*p) > 13 ) {
-		if ( 48 <= (*p) && (*p) <= 57 )
-			goto tr60;
-	} else if ( (*p) >= 9 )
+	switch( (*p) ) {
+		case 32: goto st39;
+		case 40: goto st40;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
 		goto st39;
 	goto tr0;
-tr60:
-/* #line 43 "servo_command_line.rl" */
-	{ 
-#ifdef TEST_RAGEL_PARSER
-            printf("begin_literal: %ld\n", p-data); 
-#else
-#endif
-            start = p;
-        }
-	goto st40;
 st40:
 	if ( ++p == pe )
 		goto _test_eof40;
 case 40:
-/* #line 878 "servo_command_line.inc" */
 	switch( (*p) ) {
-		case 32: goto tr61;
-		case 41: goto tr62;
+		case 32: goto st40;
+		case 45: goto tr62;
 	}
 	if ( (*p) > 13 ) {
 		if ( 48 <= (*p) && (*p) <= 57 )
-			goto st40;
+			goto tr63;
 	} else if ( (*p) >= 9 )
-		goto tr61;
+		goto st40;
 	goto tr0;
-tr61:
-/* #line 67 "servo_command_line.rl" */
-	{ 
+tr62:
+/* #line 77 "servo_command_line.rl" */
+	{
 #ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
-            for_debug(); 
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
 #endif
-            tmp = 0;
-            while(start<p){
-               tmp = tmp*10 + (*start - '0');
-               start++;
-            }
-            if(param_num<MAX_CALL_PARAMS){
-               params[param_num] = tmp;
-               param_num++;
-            }
+            sign = 1;
+        }
+/* #line 69 "servo_command_line.rl" */
+	{
 #ifdef TEST_RAGEL_PARSER
-            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+            printf(">>signed: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
 #endif
-
+            sign = -1;
         }
 	goto st41;
 st41:
 	if ( ++p == pe )
 		goto _test_eof41;
 case 41:
-/* #line 915 "servo_command_line.inc" */
+/* #line 987 "servo_command_line.inc" */
+	if ( 48 <= (*p) && (*p) <= 57 )
+		goto tr64;
+	goto tr0;
+tr63:
+/* #line 77 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = 1;
+        }
+/* #line 44 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("begin_literal: %ld\n", p-data); 
+#else
+#endif
+            start = p;
+            //sign = 1;
+        }
+	goto st42;
+tr64:
+/* #line 44 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("begin_literal: %ld\n", p-data); 
+#else
+#endif
+            start = p;
+            //sign = 1;
+        }
+	goto st42;
+st42:
+	if ( ++p == pe )
+		goto _test_eof42;
+case 42:
+/* #line 1025 "servo_command_line.inc" */
 	switch( (*p) ) {
-		case 32: goto st41;
-		case 41: goto tr65;
+		case 32: goto tr65;
+		case 44: goto tr66;
+	}
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st42;
+	} else if ( (*p) >= 9 )
+		goto tr65;
+	goto tr0;
+tr65:
+/* #line 86 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+            for_debug(); 
+#endif
+            tmp = 0;
+            while(start<p){
+               tmp = tmp*10 + (*start - '0');
+               start++;
+            }
+            if(param_num<MAX_CALL_PARAMS){
+               params[param_num] = sign*tmp;
+               param_num++;
+            }
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+#endif
+
+        }
+	goto st43;
+st43:
+	if ( ++p == pe )
+		goto _test_eof43;
+case 43:
+/* #line 1062 "servo_command_line.inc" */
+	switch( (*p) ) {
+		case 32: goto st43;
+		case 44: goto st44;
 	}
 	if ( 9 <= (*p) && (*p) <= 13 )
-		goto st41;
+		goto st43;
+	goto tr0;
+tr66:
+/* #line 86 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+            for_debug(); 
+#endif
+            tmp = 0;
+            while(start<p){
+               tmp = tmp*10 + (*start - '0');
+               start++;
+            }
+            if(param_num<MAX_CALL_PARAMS){
+               params[param_num] = sign*tmp;
+               param_num++;
+            }
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+#endif
+
+        }
+	goto st44;
+st44:
+	if ( ++p == pe )
+		goto _test_eof44;
+case 44:
+/* #line 1096 "servo_command_line.inc" */
+	switch( (*p) ) {
+		case 32: goto st44;
+		case 45: goto tr70;
+	}
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto tr71;
+	} else if ( (*p) >= 9 )
+		goto st44;
+	goto tr0;
+tr70:
+/* #line 77 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = 1;
+        }
+/* #line 69 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>signed: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = -1;
+        }
+	goto st45;
+st45:
+	if ( ++p == pe )
+		goto _test_eof45;
+case 45:
+/* #line 1129 "servo_command_line.inc" */
+	if ( 48 <= (*p) && (*p) <= 57 )
+		goto tr72;
+	goto tr0;
+tr71:
+/* #line 77 "servo_command_line.rl" */
+	{
+#ifdef TEST_RAGEL_PARSER
+            printf(">>reset_sign: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+#else
+#endif
+            sign = 1;
+        }
+/* #line 44 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("begin_literal: %ld\n", p-data); 
+#else
+#endif
+            start = p;
+            //sign = 1;
+        }
+	goto st46;
+tr72:
+/* #line 44 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf("begin_literal: %ld\n", p-data); 
+#else
+#endif
+            start = p;
+            //sign = 1;
+        }
+	goto st46;
+st46:
+	if ( ++p == pe )
+		goto _test_eof46;
+case 46:
+/* #line 1167 "servo_command_line.inc" */
+	switch( (*p) ) {
+		case 32: goto tr73;
+		case 41: goto tr74;
+	}
+	if ( (*p) > 13 ) {
+		if ( 48 <= (*p) && (*p) <= 57 )
+			goto st46;
+	} else if ( (*p) >= 9 )
+		goto tr73;
+	goto tr0;
+tr73:
+/* #line 86 "servo_command_line.rl" */
+	{ 
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %ld \"%.*s\"\n", p-data, (int)(p-start), start); 
+            for_debug(); 
+#endif
+            tmp = 0;
+            while(start<p){
+               tmp = tmp*10 + (*start - '0');
+               start++;
+            }
+            if(param_num<MAX_CALL_PARAMS){
+               params[param_num] = sign*tmp;
+               param_num++;
+            }
+#ifdef TEST_RAGEL_PARSER
+            printf(">>end_numeric: %d %d\n", param_num, tmp); 
+#endif
+
+        }
+	goto st47;
+st47:
+	if ( ++p == pe )
+		goto _test_eof47;
+case 47:
+/* #line 1204 "servo_command_line.inc" */
+	switch( (*p) ) {
+		case 32: goto st47;
+		case 41: goto tr77;
+	}
+	if ( 9 <= (*p) && (*p) <= 13 )
+		goto st47;
 	goto tr0;
 	}
 	_test_eof2: cs = 2; goto _test_eof; 
-	_test_eof42: cs = 42; goto _test_eof; 
+	_test_eof48: cs = 48; goto _test_eof; 
 	_test_eof3: cs = 3; goto _test_eof; 
 	_test_eof4: cs = 4; goto _test_eof; 
 	_test_eof5: cs = 5; goto _test_eof; 
-	_test_eof43: cs = 43; goto _test_eof; 
+	_test_eof49: cs = 49; goto _test_eof; 
 	_test_eof6: cs = 6; goto _test_eof; 
 	_test_eof7: cs = 7; goto _test_eof; 
 	_test_eof8: cs = 8; goto _test_eof; 
@@ -962,13 +1251,19 @@ case 41:
 	_test_eof39: cs = 39; goto _test_eof; 
 	_test_eof40: cs = 40; goto _test_eof; 
 	_test_eof41: cs = 41; goto _test_eof; 
+	_test_eof42: cs = 42; goto _test_eof; 
+	_test_eof43: cs = 43; goto _test_eof; 
+	_test_eof44: cs = 44; goto _test_eof; 
+	_test_eof45: cs = 45; goto _test_eof; 
+	_test_eof46: cs = 46; goto _test_eof; 
+	_test_eof47: cs = 47; goto _test_eof; 
 
 	_test_eof: {}
 	if ( p == eof )
 	{
 	switch ( cs ) {
-	case 43: 
-/* #line 95 "servo_command_line.rl" */
+	case 49: 
+/* #line 114 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf("eof at %d\n", (int)(p-start));
@@ -1016,43 +1311,49 @@ case 41:
 	case 39: 
 	case 40: 
 	case 41: 
-/* #line 88 "servo_command_line.rl" */
+	case 42: 
+	case 43: 
+	case 44: 
+	case 45: 
+	case 46: 
+	case 47: 
+/* #line 107 "servo_command_line.rl" */
 	{ 
 #ifndef TEST_RAGEL_PARSER
             printf("error at %d %s\n", (int)(p-start), p); 
 #endif
             return 0;
         }
-/* #line 95 "servo_command_line.rl" */
+/* #line 114 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf("eof at %d\n", (int)(p-start));
 #endif
         }
 	break;
-	case 42: 
-/* #line 147 "servo_command_line.rl" */
+	case 48: 
+/* #line 166 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf("COMMENT\n");
 #else            
 #endif
         }
-/* #line 95 "servo_command_line.rl" */
+/* #line 114 "servo_command_line.rl" */
 	{ 
 #ifdef TEST_RAGEL_PARSER
             printf("eof at %d\n", (int)(p-start));
 #endif
         }
 	break;
-/* #line 1049 "servo_command_line.inc" */
+/* #line 1350 "servo_command_line.inc" */
 	}
 	}
 
 	_out: {}
 	}
 
-/* #line 193 "servo_command_line.rl" */
+/* #line 212 "servo_command_line.rl" */
 
 
     return 0;
