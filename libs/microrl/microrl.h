@@ -63,8 +63,14 @@ typedef struct {
 } ring_history_t;
 #endif
 
+typedef struct microrl_s microrl_t;
+
+typedef void (*print_t)(microrl_t *this, const char *);
+
+typedef void (*execute_t)(microrl_t *this, int argc, const char * const * argv );
+
 // microrl struct, contain internal library data
-typedef struct {
+struct microrl_s{
 #ifdef _USE_ESC_SEQ
 	char escape_seq;
 	char escape;
@@ -79,16 +85,16 @@ typedef struct {
 	char cmdline [_COMMAND_LINE_LEN];  // cmdline buffer
 	int cmdlen;                        // last position in command line
 	int cursor;                        // input cursor
-	int (*execute) (int argc, const char * const * argv );            // ptr to 'execute' callback
+	execute_t execute;            // ptr to 'execute' callback
 	char ** (*get_completion) (int argc, const char * const * argv ); // ptr to 'completion' callback
-	void (*print) (const char *);                                     // ptr to 'print' callback
+	print_t print;                                     // ptr to 'print' callback
 #ifdef _USE_CTLR_C
 	void (*sigint) (void);
 #endif
-} microrl_t;
+};
 
 // init internal data, calls once at start up
-void microrl_init (microrl_t * pThis, void (*print)(const char*));
+void microrl_init (microrl_t * pThis, print_t print);
 
 // set echo mode (true/false), using for disabling echo for password input
 // echo mode will enabled after user press Enter.
@@ -104,7 +110,7 @@ void microrl_set_complete_callback (microrl_t * pThis, char ** (*get_completion)
 
 // pointer to callback func, that called when user press 'Enter'
 // execute func param: argc - argument count, argv - pointer array to token string
-void microrl_set_execute_callback (microrl_t * pThis, int (*execute)(int, const char* const*));
+void microrl_set_execute_callback (microrl_t * pThis, execute_t execute);
 
 // set callback for Ctrl+C terminal signal
 #ifdef _USE_CTLR_C
