@@ -232,10 +232,22 @@ uint32_t servo_pos_max = SERVO_MAX;
 //set limits for servo
 static void cli_LIMITS(int p1, int p2)
 {
+  char out[80];
+
+  if (p1<500 || p1>1000)  {
+    sprintf(out, "ERROR: invalid low limit %d. min:%lu max:%lu\n", p1, servo_pos_min, servo_pos_max);
+    print(out);
+    return;  
+  }
+  if (p2<2000 || p2>2500)  {
+    sprintf(out, "ERROR: invalid high limit %d. min:%lu max:%lu\n", p2, servo_pos_min, servo_pos_max);
+    print(out);
+    return;  
+  }
+
   servo_pos_min = p1;
   servo_pos_max = p2;
 
-  char out[80];
   sprintf(out, "min:%lu max:%lu\n", servo_pos_min, servo_pos_max);
   print(out);
 }
