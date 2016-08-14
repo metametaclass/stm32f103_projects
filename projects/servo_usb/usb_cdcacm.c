@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
+
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/usb/usbd.h>
@@ -215,6 +217,7 @@ void delay(int d)
 typedef struct usb_command_line_s {
   microrl_t readline;
   usbd_device *usbd_dev;
+  int current_interactive;
 } usb_command_line_t;
 
 
@@ -310,6 +313,27 @@ static void cli_SET(int p1, int p2)
   }
 }
 
+
+//printf support?
+
+int _write(int file, char *ptr, int len);
+
+int _write(int file, char *ptr, int len)
+{
+  //int i;
+
+  if (file == 1) {
+    //for (i = 0; i < len; i++)
+    //  usart_send_blocking(USART2, ptr[i]);
+    usb_printn(ptr, len);
+    return len;
+  }
+
+  errno = EIO;
+  return -1;
+}
+
+
 static void cli_ROTATE(int p1, int p2)
 {
   char out[80];
@@ -325,7 +349,7 @@ static void cli_ROTATE(int p1, int p2)
        real_pos = servo_rotate_limits(SERVO_CH2, p2, servo_pos_min, servo_pos_max); 
        break;
      default:
-       printf(out, "WARN: servo number error");
+       printf("WARN: servo number error: %d", p1);
        //print(out); 
        break;
   }
@@ -335,8 +359,68 @@ static void cli_ROTATE(int p1, int p2)
   }
 }
 
+static void cli_INTERACTIVE(int p1)
+{
+  if(p1>=1 && p1<=2) {
+    printf("enter interactive mode ch:%d\n", p1);
+    usb_cmd_line.current_interactive = p1;
+  }
+}
+
 
 #include "ragel/servo_command_line.inc"
+
+static void process_interactive(int ch, char cmd)
+{
+  enum tim_oc_id channel_id;
+  uint32_t real_pos = 0;
+
+  switch(ch){
+     case 1:
+       channel_id = SERVO_CH1; 
+       break;
+     case 2:
+       channel_id = SERVO_CH2; 
+       break;
+     default:
+       printf("WARN: servo number error: %d", ch);
+       return;
+  }
+
+  switch(cmd){
+    case 'q': 
+      usb_cmd_line.current_interactive = 0;
+      printf("exit interactive mode\n");
+      return;
+    case 'w':
+      real_pos = servo_rotate_limits(channel_id, -100, servo_pos_min, servo_pos_max);
+      break;
+    case 's':
+      real_pos = servo_rotate_limits(channel_id, 100, servo_pos_min, servo_pos_max);
+      break;
+    case 'a':
+      real_pos = servo_rotate_limits(channel_id, -10, servo_pos_min, servo_pos_max);
+      break;
+    case 'd':
+      real_pos = servo_rotate_limits(channel_id, 10, servo_pos_min, servo_pos_max);
+      break;
+    case 91:
+      real_pos = servo_set_position_limits(channel_id, servo_pos_min, servo_pos_min, servo_pos_max);  
+      break;
+    case 93:
+      real_pos = servo_set_position_limits(channel_id, servo_pos_max, servo_pos_min, servo_pos_max);  
+      break;
+    case 'c':
+      real_pos = servo_set_position_limits(channel_id, SERVO_NULL, servo_pos_min, servo_pos_max);  
+      break;
+    default:
+      return;
+  }
+  if(real_pos!=0){
+    printf("set %lu\n", real_pos);
+  }
+
+}
 
 static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 {
@@ -351,12 +435,13 @@ static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 
   if (len) {
     for(i=0;i<len;i++){
-      //memset(out, 0, sizeof(out));
-      //outlen = sprintf(out, "%d\n", (int)buf[i]);
-      //while (usbd_ep_write_packet(usbd_dev, 0x82, out, outlen) == 0);
-      microrl_insert_char (&usb_cmd_line.readline, buf[i]);
+      if (usb_cmd_line.current_interactive) {
+        printf("%d\n", (int)buf[i]);
+        process_interactive(usb_cmd_line.current_interactive, buf[i]);
+      } else {
+        microrl_insert_char (&usb_cmd_line.readline, buf[i]);
+      }
     } 
-    //servo_set_position(SERVO_CH1, SERVO_NULL);
   }
   
 }
@@ -399,6 +484,8 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 
 void init_usb_cdcacm(void)
 {
+  usb_cmd_line.current_interactive = 0;
+
   microrl_init (&usb_cmd_line.readline, usb_print);
   microrl_set_execute_callback (&usb_cmd_line.readline, execute_cmd_line);
 
