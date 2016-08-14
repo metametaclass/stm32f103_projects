@@ -38,6 +38,7 @@ AS		:= $(PREFIX)-as
 OBJCOPY		:= $(PREFIX)-objcopy
 OBJDUMP		:= $(PREFIX)-objdump
 GDB		:= $(PREFIX)-gdb
+SIZE		:= $(PREFIX)-size
 STFLASH		= $(shell which st-flash)
 STYLECHECK	:= /checkpatch.pl
 STYLECHECKFLAGS	:= --no-tree -f --terse --mailback
@@ -119,17 +120,23 @@ LDLIBS		+= -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
 ###############################################################################
 ###############################################################################
 
+#$(info using objcopy:$(OBJCOPY) size:$(SIZE))
+
 .SUFFIXES: .elf .bin .hex .srec .list .map .images
 .SECONDEXPANSION:
 .SECONDARY:
 
-all: elf
+all: elf sizes
 
 elf: $(BINARY).elf
 bin: $(BINARY).bin
 hex: $(BINARY).hex
 srec: $(BINARY).srec
 list: $(BINARY).list
+
+sizes: $(BINARY).elf
+	$(Q)#printf "  SIZE :$(SIZE)\n"
+	$(Q)$(SIZE) $(BINARY).elf
 
 images: $(BINARY).images
 flash: $(BINARY).flash
