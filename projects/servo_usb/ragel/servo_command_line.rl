@@ -48,6 +48,15 @@ static int parse_stdin_command(const char *data, int length)
             start = fpc;
         }
 
+        action start { 
+#ifdef TEST_RAGEL_PARSER
+            printf("start: %ld\n", fpc-data); 
+#else
+#endif
+            start = fpc;
+        }
+
+
         action end_literal { 
 #ifdef TEST_RAGEL_PARSER
             printf(">>end_literal: %ld \"%.*s\"\n", fpc-data, (int)(fpc-start), start); 
@@ -91,13 +100,57 @@ static int parse_stdin_command(const char *data, int length)
 
         action set { 
 #ifdef TEST_RAGEL_PARSER
-            printf("SET\n");
+            printf("SET %d %d\n", params[0], params[1]);
 #else
             
             cli_SET(params[0], params[1]);
             
 #endif
         }
+
+        action dump { 
+#ifdef TEST_RAGEL_PARSER
+            printf("DUMP\n");
+#else
+            
+            cli_DUMP();            
+#endif
+        }
+
+        action limits { 
+#ifdef TEST_RAGEL_PARSER
+            printf("LIMITS %d %d\n", params[0], params[1]);
+#else
+            
+            cli_LIMITS(params[0], params[1]);                        
+#endif
+        }
+
+        action rotate { 
+#ifdef TEST_RAGEL_PARSER
+            printf("ROTATE %d %d\n", params[0], params[1]);
+#else            
+            cli_ROTATE(params[0], params[1]);
+#endif
+        }
+
+        action unknown_command { 
+            if(start<fpc){
+#ifdef TEST_RAGEL_PARSER
+            printf("unknown_command at %d %s\n", (int)(fpc-start), fpc); 
+#else            
+            print("unknown_command\n");
+#endif
+            }
+        }
+
+        action comment { 
+#ifdef TEST_RAGEL_PARSER
+            printf("COMMENT\n");
+#else            
+#endif
+        }
+
 
         action blink_on { 
 #ifdef TEST_RAGEL_PARSER
@@ -123,11 +176,15 @@ static int parse_stdin_command(const char *data, int length)
 
         param_numeric = space* (digit+ >begin_literal %end_numeric) space* ; 
 
+        # | ( (any*) %unknown_command )
 
         main := (( "set"  space* '(' param_numeric ',' param_numeric ')' @set space* )  | 
+                 ( "rotate"  space* '(' param_numeric ',' param_numeric ')' @rotate space* ) |
                  ( "bon"  @blink_on space* )  | 
                  ( "boff"  @blink_off space* )  | 
-                 ( "//" any*)                 
+                 ( "limits"  space* '(' param_numeric ',' param_numeric ')' @limits space* ) |
+                 ( "dump"  @dump space* )  | 
+                 ( ( "//" any*) %comment)                 
                 ) $err(error) $eof(on_eof);
                       
         # Initialize and execute.
