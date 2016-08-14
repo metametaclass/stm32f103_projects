@@ -61,8 +61,6 @@ static void set_servos(uint32_t pos1_us, uint32_t pos2_us)
 
 int main(void)
 {
-     int i;
-     //usbd_device* usbd_dev;
 
      clock_init();
 
