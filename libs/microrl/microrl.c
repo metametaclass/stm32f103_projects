@@ -114,11 +114,11 @@ static int hist_restore_line (ring_history_t * pThis, char * line, int dir)
 {
 	int cnt = 0;
 	// count history record	
-	int header = pThis->begin;
-	while (pThis->ring_buf [header] != 0) {
-		header += pThis->ring_buf [header] + 1;
-		if (header >= _RING_HISTORY_LEN)
-			header -= _RING_HISTORY_LEN; 
+	int headerCnt = pThis->begin;
+	while (pThis->ring_buf [headerCnt] != 0) {
+		headerCnt += pThis->ring_buf [headerCnt] + 1;
+		if (headerCnt >= _RING_HISTORY_LEN)
+			headerCnt -= _RING_HISTORY_LEN; 
 		cnt++;
 	}
 
