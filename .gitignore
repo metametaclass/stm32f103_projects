@@ -8,4 +8,5 @@
 *.list
 *.map
 projects/servo_usb/ragel/*.inc
+projects/servo_usb/ragel/*.png
 projects/servo_usb/ragel/*.dot
