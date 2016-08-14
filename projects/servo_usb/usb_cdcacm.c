@@ -405,10 +405,10 @@ static void process_interactive(int ch, char cmd)
       real_pos = servo_rotate_limits(channel_id, 10, servo_pos_min, servo_pos_max);
       break;
     case 91:
-      real_pos = servo_set_position_limits(channel_id, servo_pos_min, servo_pos_min, servo_pos_max);  
+      real_pos = servo_set_position_limits(channel_id, 1000, servo_pos_min, servo_pos_max);  
       break;
     case 93:
-      real_pos = servo_set_position_limits(channel_id, servo_pos_max, servo_pos_min, servo_pos_max);  
+      real_pos = servo_set_position_limits(channel_id, 2000, servo_pos_min, servo_pos_max);  
       break;
     case 'c':
       real_pos = servo_set_position_limits(channel_id, SERVO_NULL, servo_pos_min, servo_pos_max);  
