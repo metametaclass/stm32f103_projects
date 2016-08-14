@@ -39,7 +39,6 @@ static void set_servos(uint32_t pos1_us, uint32_t pos2_us)
      gpio_toggle(GPIOC, GPIO13); /* LED on/off */   
      servo_set_position(SERVO_CH1, pos1_us);
      servo_set_position(SERVO_CH2, pos2_us);
-     //delay(45000000);
 }
 
 
@@ -51,7 +50,7 @@ int main(void)
 
      servo_init();
 
-     //init timer 3 interrupts
+     //init led blink 
      blink_init(); 
 
      set_servos(SERVO_NULL, SERVO_NULL);
@@ -64,37 +63,6 @@ int main(void)
 
      usb_poll_loop();
 
-     /*
-     // let pan-til "look around a little"
-     while(1) {
-          set_servos(SERVO_MIN, SERVO_MAX);
-
-          set_servos(SERVO_NULL, SERVO_NULL);
-
-          set_servos(SERVO_MAX, SERVO_MIN);
-
-          set_servos(SERVO_NULL, SERVO_NULL);
-
-          set_servos(SERVO_MIN, SERVO_MIN);
-
-          set_servos(SERVO_MAX, SERVO_MAX);
-
-          set_servos(SERVO_NULL, SERVO_NULL);
-
-          set_servos(SERVO_MIN, SERVO_NULL);
-
-          set_servos(SERVO_MAX, SERVO_NULL);
-
-          set_servos(SERVO_NULL, SERVO_NULL);
-
-          set_servos(SERVO_NULL, SERVO_MIN);
-
-          set_servos(SERVO_NULL, SERVO_MAX);
-
-          set_servos(SERVO_NULL, SERVO_NULL);
-
-     }
-     */
 
      return 0;
 }
