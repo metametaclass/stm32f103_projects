@@ -105,10 +105,10 @@ static int parse_stdin_command(const char *data, int length)
 
 
         action error { 
-#ifndef TEST_RAGEL_PARSER
-            printf("error at %d %s\n", (int)(fpc-start), fpc); 
+#ifdef TEST_RAGEL_PARSER
+            printf("error at %d \"%s\"\n", (int)(fpc-start), fpc); 
 #endif
-            return 0;
+            //return -1;
         }
 
         action on_eof { 
@@ -215,14 +215,14 @@ static int parse_stdin_command(const char *data, int length)
 
         # | ( (any*) %unknown_command )
 
-        main := (( "set"  space* '(' param_numeric ',' param_numeric ')' @set space* )  | 
-                 ( "rotate"  space* '(' param_numeric ',' param_numeric ')' @rotate space* ) |
-                 ( "bon"  @blink_on space* )  | 
-                 ( "boff"  @blink_off space* )  | 
-                 ( "interact"  '(' param_numeric ')' @interact space* )  |  
-                 ( "delay" space* '(' param_numeric ')'  @delay space* )  | 
-                 ( "limits"  space* '(' param_numeric ',' param_numeric ')' @limits space* ) |
-                 ( "dump"  @dump space* )  | 
+        main := (( ("set"  space* '(' param_numeric ',' param_numeric ')') %set space* )  | 
+                 ( ("rotate"  space* '(' param_numeric ',' param_numeric ')') %rotate space* ) |
+                 ( "bon" %blink_on space*  )  | 
+                 ( "boff" %blink_off space*  )  | 
+                 ( ("interact"  '(' param_numeric ')') %interact space* )  |  
+                 ( ("delay" space* '(' param_numeric ')')  %delay space* )  | 
+                 ( ("limits"  space* '(' param_numeric ',' param_numeric ')' ) %limits space* ) |
+                 ( "dump"  %dump space* )  | 
                  ( ( "//" any*) %comment)                 
                 ) $err(error) $eof(on_eof);
                       
@@ -231,7 +231,26 @@ static int parse_stdin_command(const char *data, int length)
         write exec;
     }%%
 
-    return 0;
+#ifdef TEST_RAGEL_PARSER
+    printf("cs: %d\n", cs);
+#endif
+
+    if(cs==servo_command_line_error){
+       printf("error\n");
+       return -1;
+    }
+
+    if(cs>=servo_command_line_first_final){
+#ifdef TEST_RAGEL_PARSER
+       printf("ok\n");
+#endif
+
+       return 0;
+    }
+    printf("unknown command");
+
+
+    return -2;
 };
 
 
