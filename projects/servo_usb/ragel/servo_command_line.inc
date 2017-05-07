@@ -31,7 +31,7 @@ static void for_debug(void)
 
 static int parse_stdin_command(const char *data, int length)
 #else
-static int parse_stdin_command(const char *data, int length) 
+static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *data, int length) 
 #endif
 {
 
@@ -134,8 +134,8 @@ tr108:
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_OFF\n");
 #else
-            print("blink_off");
-            blink_switch(0);
+            printf("blink_off");
+            CLI_blink_switch(ctx, 0);
 #endif
         }
 	goto st70;
@@ -145,8 +145,8 @@ tr110:
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_ON\n");
 #else
-            print("blink_on");
-            blink_switch(1);
+            printf("blink_on");
+            CLI_blink_switch(ctx, 1);
 #endif
         }
 	goto st70;
@@ -167,7 +167,7 @@ tr112:
             printf("DUMP\n");
 #else
             
-            cli_DUMP();            
+            cli_DUMP(ctx);            
 #endif
         }
 	goto st70;
@@ -177,7 +177,7 @@ tr113:
 #ifdef TEST_RAGEL_PARSER
             printf("INTERACTIVE %d\n", params[0]);
 #else            
-            cli_INTERACTIVE(params[0]);
+            cli_INTERACTIVE(ctx, params[0]);
 #endif
         }
 	goto st70;
@@ -188,7 +188,7 @@ tr114:
             printf("LIMITS %d %d\n", params[0], params[1]);
 #else
             
-            cli_LIMITS(params[0], params[1]);                        
+            cli_LIMITS(ctx, params[0], params[1]);
 #endif
         }
 	goto st70;
@@ -198,7 +198,7 @@ tr115:
 #ifdef TEST_RAGEL_PARSER
             printf("ROTATE %d %d\n", params[0], params[1]);
 #else            
-            cli_ROTATE(params[0], params[1]);
+            cli_ROTATE(ctx, params[0], params[1]);
 #endif
         }
 	goto st70;
@@ -209,7 +209,7 @@ tr116:
             printf("SET %d %d\n", params[0], params[1]);
 #else
             
-            cli_SET(params[0], params[1]);
+            cli_SET(ctx, params[0], params[1]);
             
 #endif
         }
@@ -1829,7 +1829,7 @@ case 77:
             printf("SET %d %d\n", params[0], params[1]);
 #else
             
-            cli_SET(params[0], params[1]);
+            cli_SET(ctx, params[0], params[1]);
             
 #endif
         }
@@ -1847,7 +1847,7 @@ case 77:
             printf("DUMP\n");
 #else
             
-            cli_DUMP();            
+            cli_DUMP(ctx);            
 #endif
         }
 /* #line 114 "servo_command_line.rl" */
@@ -1864,7 +1864,7 @@ case 77:
             printf("LIMITS %d %d\n", params[0], params[1]);
 #else
             
-            cli_LIMITS(params[0], params[1]);                        
+            cli_LIMITS(ctx, params[0], params[1]);
 #endif
         }
 /* #line 114 "servo_command_line.rl" */
@@ -1880,7 +1880,7 @@ case 77:
 #ifdef TEST_RAGEL_PARSER
             printf("ROTATE %d %d\n", params[0], params[1]);
 #else            
-            cli_ROTATE(params[0], params[1]);
+            cli_ROTATE(ctx, params[0], params[1]);
 #endif
         }
 /* #line 114 "servo_command_line.rl" */
@@ -1912,7 +1912,7 @@ case 77:
 #ifdef TEST_RAGEL_PARSER
             printf("INTERACTIVE %d\n", params[0]);
 #else            
-            cli_INTERACTIVE(params[0]);
+            cli_INTERACTIVE(ctx, params[0]);
 #endif
         }
 /* #line 114 "servo_command_line.rl" */
@@ -1943,8 +1943,8 @@ case 77:
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_ON\n");
 #else
-            print("blink_on");
-            blink_switch(1);
+            printf("blink_on");
+            CLI_blink_switch(ctx, 1);
 #endif
         }
 /* #line 114 "servo_command_line.rl" */
@@ -1960,8 +1960,8 @@ case 77:
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_OFF\n");
 #else
-            print("blink_off");
-            blink_switch(0);
+            printf("blink_off");
+            CLI_blink_switch(ctx, 0);
 #endif
         }
 /* #line 114 "servo_command_line.rl" */

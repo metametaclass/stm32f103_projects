@@ -1,68 +1,65 @@
-/*
- * This file is part of the PWM-Servo example.
- *
- * Copyright (C) 2011 Stefan Wendler <sw@kaltpost.de>
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
 
-#include "../servo_pwm/servo.h"
+#include "../../libs/macros.h"
+#include "../../libs/utils.h"
+
+//#include "../servo_pwm/servo.h"
 #include "blink.h"
+
+
 #include "usb_cdcacm.h"
+#include "command_line.h"
+#include "control_context.h"
+
 
 /**
  * Setup the system clock to 72MHz.
  */
-static void clock_init(void)
-{
-     rcc_clock_setup_in_hse_8mhz_out_72mhz();
+static void clock_init(void) {
+    rcc_clock_setup_in_hse_8mhz_out_72mhz();
 }
 
 
 
-static void set_servos(uint32_t pos1_us, uint32_t pos2_us)
-{
-     gpio_toggle(GPIOC, GPIO13); /* LED on/off */   
-     servo_set_position(SERVO_CH1, pos1_us);
-     servo_set_position(SERVO_CH2, pos2_us);
+/*static void set_servos(uint32_t pos1_us, uint32_t pos2_us) {
+    gpio_toggle(GPIOC, GPIO13); //LED on/off
+    servo_set_position(SERVO_CH1, pos1_us);
+    servo_set_position(SERVO_CH2, pos2_us);
+}*/
+
+
+static void usb_print_callback(microrl_t *this, const char * str){
+    servo_usb_control_context_t *ctx = container_of(this, servo_usb_control_context_t, readline);
+    usb_prints(&ctx->usb, str);
 }
 
 
 
-int main(void)
-{
+int main(void) {
 
-     clock_init();
+    clock_init();
 
-     servo_init();
+    //init led blink
+    blink_init();
 
-     //init led blink 
-     blink_init(); 
+    servo_usb_control_context_t ctrl_context = {{0},{0},0,0,0};
 
-     set_servos(SERVO_NULL, SERVO_NULL);
+    control_context_init(&ctrl_context);
 
-     init_usb_cdcacm();
+    //servo_init();
+    //set_servos(SERVO_NULL, SERVO_NULL);
 
-     gpio_clear(GPIOC, GPIO13);
-     delay(0x800000);
-     gpio_set(GPIOC, GPIO13);  
+    command_line_init(&ctrl_context.readline, usb_print_callback);
 
-     usb_poll_loop();
+    usb_cdcacm_init(&ctrl_context.usb, command_line_process_usb);
+
+    gpio_clear(GPIOC, GPIO13);
+    delay(0x800000);
+    gpio_set(GPIOC, GPIO13);
+
+    usb_cdcacm_poll_loop(&ctrl_context.usb);
 
 
-     return 0;
+    return 0;
 }

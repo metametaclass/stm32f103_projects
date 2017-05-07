@@ -22,7 +22,7 @@ static void for_debug(void)
 
 static int parse_stdin_command(const char *data, int length)
 #else
-static int parse_stdin_command(const char *data, int length) 
+static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *data, int length) 
 #endif
 {
 
@@ -122,7 +122,7 @@ static int parse_stdin_command(const char *data, int length)
             printf("SET %d %d\n", params[0], params[1]);
 #else
             
-            cli_SET(params[0], params[1]);
+            cli_SET(ctx, params[0], params[1]);
             
 #endif
         }
@@ -132,7 +132,7 @@ static int parse_stdin_command(const char *data, int length)
             printf("DUMP\n");
 #else
             
-            cli_DUMP();            
+            cli_DUMP(ctx);            
 #endif
         }
 
@@ -141,7 +141,7 @@ static int parse_stdin_command(const char *data, int length)
             printf("LIMITS %d %d\n", params[0], params[1]);
 #else
             
-            cli_LIMITS(params[0], params[1]);                        
+            cli_LIMITS(ctx, params[0], params[1]);
 #endif
         }
 
@@ -149,7 +149,7 @@ static int parse_stdin_command(const char *data, int length)
 #ifdef TEST_RAGEL_PARSER
             printf("ROTATE %d %d\n", params[0], params[1]);
 #else            
-            cli_ROTATE(params[0], params[1]);
+            cli_ROTATE(ctx, params[0], params[1]);
 #endif
         }
 
@@ -166,7 +166,7 @@ static int parse_stdin_command(const char *data, int length)
 #ifdef TEST_RAGEL_PARSER
             printf("INTERACTIVE %d\n", params[0]);
 #else            
-            cli_INTERACTIVE(params[0]);
+            cli_INTERACTIVE(ctx, params[0]);
 #endif
         }
 
@@ -176,7 +176,7 @@ static int parse_stdin_command(const char *data, int length)
 #ifdef TEST_RAGEL_PARSER
             printf("unknown_command at %d %s\n", (int)(fpc-start), fpc); 
 #else            
-            print("unknown_command\n");
+            printf("unknown_command\n");
 #endif
             }
         }
@@ -193,8 +193,8 @@ static int parse_stdin_command(const char *data, int length)
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_ON\n");
 #else
-            print("blink_on");
-            blink_switch(1);
+            printf("blink_on");
+            CLI_blink_switch(ctx, 1);
 #endif
         }
 
@@ -202,8 +202,8 @@ static int parse_stdin_command(const char *data, int length)
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_OFF\n");
 #else
-            print("blink_off");
-            blink_switch(0);
+            printf("blink_off");
+            CLI_blink_switch(ctx, 0);
 #endif
         }
 

@@ -11,9 +11,6 @@
 
 #include "usb_cdcacm.h"
 #include "blink.h"
-#include "../servo_pwm/servo.h"
-
-#include "../../libs/microrl/microrl.h"
 
 
 static const struct usb_device_descriptor dev = {
@@ -196,23 +193,7 @@ static int cdcacm_control_request(usbd_device *usbd_dev, struct usb_setup_data *
   return 0;
 }
 
-
-/**
- * Delay by executing some "nop"s.
- *
- * @param[in] d number of "nop"s to perform.
- */
-void delay(int d)
-{
-
-     int i;
-
-     for(i = 0; i < d; i++) {
-          __asm("nop");
-     }
-}
-
-
+/*
 //readline and usbdev ptr struct
 typedef struct usb_command_line_s {
   microrl_t readline;
@@ -220,22 +201,30 @@ typedef struct usb_command_line_s {
   int current_interactive;
 } usb_command_line_t;
 
+//static usb_command_line_t usb_cmd_line;
+*/
 
 
-static usb_command_line_t usb_cmd_line;
 
-static void usb_printn(const char *str, size_t len)
-{
+static void usb_printn(usbd_device *usbd_dev, const char *str, size_t len) {
   if(len==0){
     return;
   }
-  while (usbd_ep_write_packet(usb_cmd_line.usbd_dev, 0x82, str, len) == 0);
+  while (usbd_ep_write_packet(usbd_dev, 0x82, str, len) == 0);
 }
 
+void usb_print(usb_cdcacm_context_t *ctx, const char *str, size_t len){
+  usb_printn(ctx->usbd_dev, str, len);
+}
 
+void usb_prints(usb_cdcacm_context_t *ctx, const char *str){
+  usb_printn(ctx->usbd_dev, str, strlen(str));
+}
+
+/*
 static void print(const char *str)
 {
-  size_t len = strlen(str);  
+  size_t len = strlen(str);
 
   usb_printn(str, len);
 }
@@ -244,88 +233,26 @@ static void print(const char *str)
 static void usb_print(microrl_t *prl, const char *str)
 {
   (void) prl;
-  
+
   print(str);
-}
-
-uint32_t servo_pos_min = SERVO_MIN;
-uint32_t servo_pos_max = SERVO_MAX;
+}*/
 
 
-//set limits for servo
-static void cli_LIMITS(int p1, int p2)
-{
-  char out[80];
-
-  if (p1<500 || p1>1000)  {
-    sprintf(out, "ERROR: invalid low limit %d. min:%lu max:%lu\n", p1, servo_pos_min, servo_pos_max);
-    print(out);
-    return;  
-  }
-  if (p2<2000 || p2>2500)  {
-    sprintf(out, "ERROR: invalid high limit %d. min:%lu max:%lu\n", p2, servo_pos_min, servo_pos_max);
-    print(out);
-    return;  
-  }
-
-  servo_pos_min = p1;
-  servo_pos_max = p2;
-
-  sprintf(out, "min:%lu max:%lu\n", servo_pos_min, servo_pos_max);
-  print(out);
-}
-
-
-static void cli_DUMP(void)
-{
-  char out[80];
-  uint32_t pos_ch1 = servo_get_position(SERVO_CH1);
-  uint32_t pos_ch2 = servo_get_position(SERVO_CH2);
-
-  sprintf(out, "ch1:%lu  ch2: %lu min:%lu max:%lu\n", pos_ch1, pos_ch2, servo_pos_min, servo_pos_max);
-  print(out);
-}
-
-
-//set servo position
-static void cli_SET(int p1, int p2)
-{
-  char out[80];
-  uint32_t real_pos = 0;
-  /*outlen = */sprintf(out, "servo:%d value:%d\n", p1, p2);
-  print(out);
-
-  switch(p1){
-     case 1:
-       real_pos = servo_set_position_limits(SERVO_CH1, p2, servo_pos_min, servo_pos_max); 
-       break;
-     case 2:
-       real_pos = servo_set_position_limits(SERVO_CH2, p2, servo_pos_min, servo_pos_max); 
-       break;
-     default:
-       /*outlen = */sprintf(out, "WARN: servo number error. servo:%d value:%d\n", p1, p2);
-       print(out); 
-       break;
-  }
-  if(real_pos!=0){
-    sprintf(out, "set %lu\n", real_pos);
-    print(out);
-  }
-}
-
-
-//printf support?
+//global variable (no place to pass context explicitly in callback params)
+static usb_cdcacm_context_t *global_usb_context;
 
 int _write(int file, char *ptr, int len);
 
-int _write(int file, char *ptr, int len)
-{
-  //int i;
+int _write(int file, char *ptr, int len){
+  if(!global_usb_context){
+    errno = EIO;
+    return -1;
+  }
 
   if (file == 1) {
     //for (i = 0; i < len; i++)
     //  usart_send_blocking(USART2, ptr[i]);
-    usb_printn(ptr, len);
+    usb_printn(global_usb_context->usbd_dev, ptr, len);
     return len;
   }
 
@@ -334,99 +261,12 @@ int _write(int file, char *ptr, int len)
 }
 
 
-static void cli_ROTATE(int p1, int p2)
-{
-  char out[80];
-  uint32_t real_pos = 0;
-  sprintf(out, "rotate servo:%d angle(ms):%d\n", p1, p2);
-  print(out);
-
-  switch(p1){
-     case 1:
-       real_pos = servo_rotate_limits(SERVO_CH1, p2, servo_pos_min, servo_pos_max); 
-       break;
-     case 2:
-       real_pos = servo_rotate_limits(SERVO_CH2, p2, servo_pos_min, servo_pos_max); 
-       break;
-     default:
-       printf("WARN: servo number error: %d", p1);
-       //print(out); 
-       break;
-  }
-  if(real_pos!=0){
-    sprintf(out, "position %lu\n", real_pos);
-    print(out);
-  }
-}
-
-static void cli_INTERACTIVE(int p1)
-{
-  if(p1>=1 && p1<=2) {
-    printf("enter interactive mode ch:%d\n", p1);
-    usb_cmd_line.current_interactive = p1;
-  }
-}
-
-
-#include "ragel/servo_command_line.inc"
-
-static void process_interactive(int ch, char cmd)
-{
-  enum tim_oc_id channel_id;
-  uint32_t real_pos = 0;
-
-  switch(ch){
-     case 1:
-       channel_id = SERVO_CH1; 
-       break;
-     case 2:
-       channel_id = SERVO_CH2; 
-       break;
-     default:
-       printf("WARN: servo number error: %d", ch);
-       return;
-  }
-
-  switch(cmd){
-    case 'q': 
-      usb_cmd_line.current_interactive = 0;
-      printf("exit interactive mode\n");
-      return;
-    case 'w':
-      real_pos = servo_rotate_limits(channel_id, -100, servo_pos_min, servo_pos_max);
-      break;
-    case 's':
-      real_pos = servo_rotate_limits(channel_id, 100, servo_pos_min, servo_pos_max);
-      break;
-    case 'd':
-      real_pos = servo_rotate_limits(channel_id, -10, servo_pos_min, servo_pos_max);
-      break;
-    case 'a':
-      real_pos = servo_rotate_limits(channel_id, 10, servo_pos_min, servo_pos_max);
-      break;
-    case 93:
-      real_pos = servo_set_position_limits(channel_id, 1000, servo_pos_min, servo_pos_max);  
-      break;
-    case 91:
-      real_pos = servo_set_position_limits(channel_id, 2000, servo_pos_min, servo_pos_max);  
-      break;
-    case 'c':
-      real_pos = servo_set_position_limits(channel_id, SERVO_NULL, servo_pos_min, servo_pos_max);  
-      break;
-    default:
-      return;
-  }
-  if(real_pos!=0){
-    printf("set %lu\n", real_pos);
-  }
-
-}
 
 static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
 {
   (void)ep;
   (void)usbd_dev;
-  int i;
+  //int i;
   //int outlen;
   char buf[64];
   //char out[10];
@@ -434,36 +274,12 @@ static void cdcacm_data_rx_cb(usbd_device *usbd_dev, uint8_t ep)
   int len = usbd_ep_read_packet(usbd_dev, 0x01, buf, 64);
 
   if (len) {
-    for(i=0;i<len;i++){
-      if (usb_cmd_line.current_interactive) {
-        printf("%d\n", (int)buf[i]);
-        process_interactive(usb_cmd_line.current_interactive, buf[i]);
-      } else {
-        microrl_insert_char (&usb_cmd_line.readline, buf[i]);
-      }
-    } 
+    global_usb_context->on_read(global_usb_context, len, buf);
   }
-  
+
 }
 
 
-
-
-
-
-static void execute_cmd_line(microrl_t *prl, int argc, const char * const * argv)
-{
-  (void) prl;
-  (void) argc;
-  (void) argv;
-  int i;
-  //gpio_toggle(GPIOC, GPIO13);
-  for(i=0;i<argc;i++){
-    if(argv[i]) {
-      parse_stdin_command(argv[i], strlen(argv[i]));
-    }
-  }
-}
 
 static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 {
@@ -482,21 +298,24 @@ static void cdcacm_set_config(usbd_device *usbd_dev, uint16_t wValue)
 }
 
 
-void init_usb_cdcacm(void)
-{
-  usb_cmd_line.current_interactive = 0;
+void usb_cdcacm_init(usb_cdcacm_context_t *ctx, on_usb_callback_t on_read) {
+  //usb_cmd_line.current_interactive = 0;
 
-  microrl_init (&usb_cmd_line.readline, usb_print);
-  microrl_set_execute_callback (&usb_cmd_line.readline, execute_cmd_line);
 
-  usb_cmd_line.usbd_dev = usbd_init(&st_usbfs_v1_usb_driver, &dev, &config, usb_strings, 3, usbd_control_buffer, sizeof(usbd_control_buffer));
-  usbd_register_set_config_callback(usb_cmd_line.usbd_dev, cdcacm_set_config);
+  global_usb_context = ctx;
 
+  ctx->on_read = on_read;
+  ctx->usbd_dev = usbd_init(&st_usbfs_v1_usb_driver, &dev, &config, usb_strings, 3,
+      usbd_control_buffer, sizeof(usbd_control_buffer));
+  usbd_register_set_config_callback(ctx->usbd_dev, cdcacm_set_config);
+
+}
+
+
+void usb_cdcacm_poll_loop(usb_cdcacm_context_t *ctx){
+  while (1){
+    usbd_poll(ctx->usbd_dev);
+  }
 }
 
 
-void usb_poll_loop(void){
-     while (1)
-       usbd_poll(usb_cmd_line.usbd_dev);
-
-}
