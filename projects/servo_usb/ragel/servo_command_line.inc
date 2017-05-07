@@ -134,7 +134,7 @@ tr108:
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_OFF\n");
 #else
-            printf("blink_off");
+            printf("blink_off\n");
             CLI_blink_switch(ctx, 0);
 #endif
         }
@@ -145,7 +145,7 @@ tr110:
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_ON\n");
 #else
-            printf("blink_on");
+            printf("blink_on\n");
             CLI_blink_switch(ctx, 1);
 #endif
         }
@@ -1943,7 +1943,7 @@ case 77:
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_ON\n");
 #else
-            printf("blink_on");
+            printf("blink_on\n");
             CLI_blink_switch(ctx, 1);
 #endif
         }
@@ -1960,7 +1960,7 @@ case 77:
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_OFF\n");
 #else
-            printf("blink_off");
+            printf("blink_off\n");
             CLI_blink_switch(ctx, 0);
 #endif
         }
@@ -1997,7 +1997,7 @@ case 77:
 
        return 0;
     }
-    printf("unknown command");
+    printf("unknown command\n");
 
 
     return -2;

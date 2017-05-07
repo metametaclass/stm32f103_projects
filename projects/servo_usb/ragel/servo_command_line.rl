@@ -193,7 +193,7 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_ON\n");
 #else
-            printf("blink_on");
+            printf("blink_on\n");
             CLI_blink_switch(ctx, 1);
 #endif
         }
@@ -202,7 +202,7 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
 #ifdef TEST_RAGEL_PARSER
             printf("BLINK_OFF\n");
 #else
-            printf("blink_off");
+            printf("blink_off\n");
             CLI_blink_switch(ctx, 0);
 #endif
         }
@@ -247,7 +247,7 @@ static int parse_stdin_command(servo_usb_control_context_t *ctx, const char *dat
 
        return 0;
     }
-    printf("unknown command");
+    printf("unknown command\n");
 
 
     return -2;

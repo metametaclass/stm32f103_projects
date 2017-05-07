@@ -30,12 +30,12 @@ static void usb_print_callback(microrl_t *this, const char * str){
 
 
 
-
 int main(void) {
 
     clock_init();
 
     //init led blink
+    led_gpio_init();
     //blink_init();
 
     servo_usb_control_context_t ctrl_context;
@@ -58,6 +58,7 @@ int main(void) {
     gpio_set(GPIOC, GPIO13);
 
     usb_cdcacm_poll_loop(&ctrl_context.usb);
+    //while(1);
 
 
     return 0;

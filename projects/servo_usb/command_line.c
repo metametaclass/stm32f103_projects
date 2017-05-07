@@ -12,6 +12,7 @@
 
 static void CLI_blink_switch(servo_usb_control_context_t *ctx, int on){
   (void) ctx;
+  led_toggle();
   blink_switch(on);
 }
 

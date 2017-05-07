@@ -6,19 +6,19 @@
 #include <libopencm3/cm3/nvic.h>
 
 
-
 void tim3_isr(void)
 {
   if (timer_get_flag(TIM3, TIM_SR_UIF)) {
-    gpio_toggle(GPIOC, GPIO13);   // LEDon/off.    
+    gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
     timer_clear_flag(TIM3, TIM_SR_UIF);
   }
 }
 
+
 /**
  * Initialize the GPIO port for the LED at pin 13 on port C.
  */
-static void gpio_init(void)
+void led_gpio_init(void)
 {
      /* enable GPIOC clock */
      //rcc_peripheral_enable_clock(&RCC_APB2ENR, RCC_APB2ENR_IOPCEN);
@@ -29,13 +29,16 @@ static void gpio_init(void)
      gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_2_MHZ, GPIO_CNF_OUTPUT_PUSHPULL, GPIO13);
 }
 
+void led_toggle(void){
+  gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
+}
 
 static void tim3_init(void)
 {
 
      nvic_enable_irq(NVIC_TIM3_IRQ);
      nvic_set_priority(NVIC_TIM3_IRQ, 1);
-     
+
      rcc_periph_clock_enable(RCC_TIM3);
 
      timer_set_prescaler(TIM3, 1439);
@@ -53,15 +56,15 @@ static void tim3_init(void)
 
 void blink_init(void)
 {
-  gpio_init();
-  tim3_init();  
+  led_gpio_init();
+  tim3_init();
 }
 
 
 
 void blink_switch(int on)
 {
-  gpio_set(GPIOC, GPIO13);
+  //gpio_set(GPIOC, GPIO13);
   if(on){
     timer_enable_counter(TIM3);
   }else {
