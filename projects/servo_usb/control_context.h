@@ -6,7 +6,7 @@
 #include "pwm_timer_servo.h"
 
 
-#define SERVO_COUNT 6
+#define SERVO_COUNT 8
 
 
 typedef union multi_servo_u {
@@ -26,6 +26,8 @@ typedef struct servo_usb_control_context_s {
 
     int current_interactive;
 
+    servo_desc_t *current_servo;
+
     uint32_t servo_pos_min;
 
     uint32_t servo_pos_max;
@@ -40,6 +42,8 @@ typedef struct servo_usb_control_context_s {
 void control_context_init(servo_usb_control_context_t *ctx);
 
 void control_context_create_servos(servo_usb_control_context_t *ctx);
+
+void control_context_start_timers(servo_usb_control_context_t *ctx);
 
 void command_line_process_usb(usb_cdcacm_context_t *usb, int len, char *buffer);
 

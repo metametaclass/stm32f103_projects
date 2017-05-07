@@ -36,7 +36,7 @@ int main(void) {
     clock_init();
 
     //init led blink
-    blink_init();
+    //blink_init();
 
     servo_usb_control_context_t ctrl_context;
     memset(&ctrl_context, 0, sizeof(ctrl_context));
@@ -46,7 +46,8 @@ int main(void) {
     control_context_create_servos(&ctrl_context);
 
     set_all_servos(&ctrl_context, SERVO_NULL);
-    //set_servos(SERVO_NULL, SERVO_NULL);
+
+    control_context_start_timers(&ctrl_context);
 
     command_line_init(&ctrl_context.readline, usb_print_callback);
 

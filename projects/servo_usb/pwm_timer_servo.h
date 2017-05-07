@@ -32,6 +32,9 @@ void pwm_timer_init(pwm_timer_desc_t *pwm_timer,
     uint32_t periph_enable);
 
 
+void pwm_timer_start(pwm_timer_desc_t *pwm_timer);
+
+
 void pwm_timer_servo_init(pwm_timer_servo_desc_t *pwm_timer_servo,
     pwm_timer_desc_t *timer,
     enum tim_oc_id oc_id,

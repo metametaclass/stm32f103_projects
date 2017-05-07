@@ -31,7 +31,11 @@ void multiservo_init(servo_desc_t *servo,
 
 int multiservo_set_position(servo_desc_t *servo, uint32_t pos_us);
 
+int multiservo_set_position2(servo_desc_t *servo, uint32_t *pos_us);
+
 int multiservo_get_position(servo_desc_t *servo, uint32_t *pos_us);
+
+int multiservo_rotate(servo_desc_t *servo, int32_t delta_us, uint32_t *pos_us);
 
 
 #endif

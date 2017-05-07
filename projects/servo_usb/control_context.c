@@ -15,54 +15,45 @@
 
 
 static void process_interactive(servo_usb_control_context_t *ctx, char cmd) {
-  //enum tim_oc_id channel_id;
   uint32_t real_pos = 0;
+  int rc;
 
-  /*switch(ch){
-     case 1:
-       channel_id = SERVO_CH1;
-       break;
-     case 2:
-       channel_id = SERVO_CH2;
-       break;
-     default:
-       printf("WARN: servo number error: %d", ch);
-       return;
-  }
 
   switch(cmd){
     case 'q':
-      usb_cmd_line.current_interactive = 0;
+      ctx->current_interactive = 0;
+      ctx->current_servo = NULL;
       printf("exit interactive mode\n");
       return;
     case 'w':
-      real_pos = servo_rotate_limits(channel_id, -100, servo_pos_min, servo_pos_max);
+      rc = multiservo_rotate(ctx->current_servo, -100, &real_pos);
       break;
     case 's':
-      real_pos = servo_rotate_limits(channel_id, 100, servo_pos_min, servo_pos_max);
+      rc = multiservo_rotate(ctx->current_servo, 100, &real_pos);
       break;
     case 'd':
-      real_pos = servo_rotate_limits(channel_id, -10, servo_pos_min, servo_pos_max);
+      rc = multiservo_rotate(ctx->current_servo, -10, &real_pos);
       break;
     case 'a':
-      real_pos = servo_rotate_limits(channel_id, 10, servo_pos_min, servo_pos_max);
+      rc = multiservo_rotate(ctx->current_servo, 10, &real_pos);
       break;
     case 93:
-      real_pos = servo_set_position_limits(channel_id, 1000, servo_pos_min, servo_pos_max);
+      real_pos = 1000;
+      rc = multiservo_set_position2(ctx->current_servo, &real_pos);
       break;
     case 91:
-      real_pos = servo_set_position_limits(channel_id, 2000, servo_pos_min, servo_pos_max);
+      real_pos = 2000;
+      rc = multiservo_set_position2(ctx->current_servo, &real_pos);
       break;
     case 'c':
-      real_pos = servo_set_position_limits(channel_id, SERVO_NULL, servo_pos_min, servo_pos_max);
+      real_pos = SERVO_NULL;
+      rc = multiservo_set_position2(ctx->current_servo, &real_pos);
       break;
     default:
       return;
   }
-  if(real_pos!=0){
-    printf("set %lu\n", real_pos);
-  }*/
 
+  printf("set %lu\n rc:%d", real_pos, rc);
 }
 
 
@@ -98,7 +89,11 @@ void control_context_init(servo_usb_control_context_t *ctx){
 }
 
 
-
+void control_context_start_timers(servo_usb_control_context_t *ctx){
+  pwm_timer_start(&ctx->timer2);
+  pwm_timer_start(&ctx->timer3);
+  pwm_timer_start(&ctx->timer4);
+}
 
 void control_context_create_servos(servo_usb_control_context_t *ctx){
     pwm_timer_servo_init(&ctx->servos[0].pwm_timer, &ctx->timer2,
@@ -121,5 +116,12 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
     pwm_timer_servo_init(&ctx->servos[5].pwm_timer, &ctx->timer4,
         TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOB, GPIO_TIM4_CH2);//PB7
 
-    ctx->servo_count = 6;
+
+    pwm_timer_servo_init(&ctx->servos[6].pwm_timer, &ctx->timer2,
+        TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH3);//PA2
+
+    pwm_timer_servo_init(&ctx->servos[7].pwm_timer, &ctx->timer2,
+        TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH4);//PA3
+
+    ctx->servo_count = SERVO_COUNT;
 }

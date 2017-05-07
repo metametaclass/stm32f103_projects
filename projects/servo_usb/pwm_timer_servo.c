@@ -115,3 +115,8 @@ void pwm_timer_init(pwm_timer_desc_t *pwm_timer,
     pwm_timer->prescaler = PWM_PRESCALE;
     pwm_timer->period = PWM_PERIOD;
 }
+
+
+void pwm_timer_start(pwm_timer_desc_t *pwm_timer){
+    timer_enable_counter(pwm_timer->timer_peripheral);
+}

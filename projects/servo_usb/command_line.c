@@ -80,33 +80,28 @@ static void cli_SET(servo_usb_control_context_t *ctx, int p1, int p2) {
 static void cli_ROTATE(servo_usb_control_context_t *ctx, int p1, int p2) {
   (void) ctx;
   //char out[80];
-  uint32_t real_pos = 0;
-  printf("rotate servo:%d angle(ms):%d\n", p1, p2);
-  //print(out);
 
-  switch(p1){
-     case 1:
-       //real_pos = servo_rotate_limits(SERVO_CH1, p2, servo_pos_min, servo_pos_max);
-       break;
-     case 2:
-       //real_pos = servo_rotate_limits(SERVO_CH2, p2, servo_pos_min, servo_pos_max);
-       break;
-     default:
-       printf("WARN: servo number error: %d\n", p1);
-       //print(out);
-       break;
+  printf("rotate servo:%d angle(ms):%d\n", p1, p2);
+  if(p1<0 || p1>=ctx->servo_count){
+    printf("invalid servo num %d\n", p1);
+    return;
   }
-  if(real_pos!=0){
-    printf("position %lu\n", real_pos);
-    //print(out);
-  }
+  uint32_t real_pos = 0;
+
+  int rc = multiservo_rotate(&ctx->servos[p1].servo, p2, &real_pos);
+
+  printf("position %lu\n rc:%d", real_pos, rc);
 }
 
 static void cli_INTERACTIVE(servo_usb_control_context_t *ctx, int p1) {
-  if(p1>=1 && p1<=2) {
-    printf("enter interactive mode ch:%d\n", p1);
-    ctx->current_interactive = p1;
+  if(p1<0 || p1>=ctx->servo_count){
+    printf("invalid servo num %d\n", p1);
+    return;
   }
+
+  printf("enter interactive mode ch:%d\n", p1);
+  ctx->current_interactive = 1;
+  ctx->current_servo = &ctx->servos[p1].servo;
 }
 
 
