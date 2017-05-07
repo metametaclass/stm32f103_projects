@@ -130,7 +130,7 @@ void control_context_start_timers(servo_usb_control_context_t *ctx){
   timer_enable_irq(TIM1, TIM_DIER_UIE);
   nvic_set_priority(NVIC_TIM1_UP_IRQ, 1);
 
-  timer_enable_preload_complementry_enable_bits(TIM1);
+  //timer_enable_preload_complementry_enable_bits(TIM1);
   timer_enable_break_main_output(TIM1);
 
 
@@ -159,26 +159,25 @@ static void add_timer_pwm_servo(servo_usb_control_context_t *ctx,
 }
 
 void control_context_create_servos(servo_usb_control_context_t *ctx){
+  //TODO: fix duplicate peripheral init
+
   add_timer_pwm_servo(ctx, &ctx->timer2,
         TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH1_ETR);//PA0
 
-    //TODO: fix duplicate peripheral init
   add_timer_pwm_servo(ctx, &ctx->timer2,
         TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH2);//PA1
 
-  /*add_timer_pwm_servo(ctx, &ctx->timer3,
+  add_timer_pwm_servo(ctx, &ctx->timer3,
         TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM3_CH1);//PA6
 
   add_timer_pwm_servo(ctx, &ctx->timer3,
-        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH2);//PA7
-
-
-  add_timer_pwm_servo(ctx, &ctx->timer4,
-        TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOB, GPIO_TIM4_CH1); //PB6
+        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM3_CH2);//PA7
 
   add_timer_pwm_servo(ctx, &ctx->timer4,
-        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOB, GPIO_TIM4_CH2);//PB7
-*/
+        TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH1);//PB6
+
+  add_timer_pwm_servo(ctx, &ctx->timer4,
+        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH2);//PB7
 
   add_timer_pwm_servo(ctx, &ctx->timer2,
         TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH3);//PA2
@@ -187,17 +186,31 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
         TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH4);//PA3
 
 
+  add_timer_pwm_servo(ctx, &ctx->timer3,
+        TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM3_CH3);//PB0
+
+  add_timer_pwm_servo(ctx, &ctx->timer3,
+        TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM3_CH4);//PB1
+
+
+  add_timer_pwm_servo(ctx, &ctx->timer4,
+        TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH3);//PB8
+
+  add_timer_pwm_servo(ctx, &ctx->timer4,
+        TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH4);//PB9
+
+
   add_timer_pwm_servo(ctx, &ctx->timer1,
         TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH1);//PA8
 
   add_timer_pwm_servo(ctx, &ctx->timer1,
         TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH2);//PA9
 
-/*
   add_timer_pwm_servo(ctx, &ctx->timer1,
         TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH3);//PA10
 
-  add_timer_pwm_servo(ctx, &ctx->timer1,
-        TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH4);//PA11*/
+  //used for usb
+  //add_timer_pwm_servo(ctx, &ctx->timer1,
+  //      TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH4);//PA11
 
 }
