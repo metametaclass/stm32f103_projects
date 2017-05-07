@@ -83,6 +83,10 @@ void control_context_init(servo_usb_control_context_t *ctx){
   ctx->servo_pos_min = SERVO_MIN;
   ctx->servo_pos_max = SERVO_MAX;
 
+  pwm_timer_init(&ctx->timer1, &RCC_APB2ENR, TIM1, RCC_APB2ENR_TIM1EN);
+  timer_enable_preload_complementry_enable_bits(TIM1);
+  timer_enable_break_main_output(TIM1);
+
   pwm_timer_init(&ctx->timer2, &RCC_APB1ENR, TIM2, RCC_APB1ENR_TIM2EN);
   pwm_timer_init(&ctx->timer3, &RCC_APB1ENR, TIM3, RCC_APB1ENR_TIM3EN);
   pwm_timer_init(&ctx->timer4, &RCC_APB1ENR, TIM4, RCC_APB1ENR_TIM4EN);
@@ -90,38 +94,66 @@ void control_context_init(servo_usb_control_context_t *ctx){
 
 
 void control_context_start_timers(servo_usb_control_context_t *ctx){
+  pwm_timer_start(&ctx->timer1);
   pwm_timer_start(&ctx->timer2);
   pwm_timer_start(&ctx->timer3);
   pwm_timer_start(&ctx->timer4);
 }
 
+static void add_timer_pwm_servo(servo_usb_control_context_t *ctx,
+      pwm_timer_desc_t *timer,
+      enum tim_oc_id oc_id,
+      volatile uint32_t *gpio_peripheral_register,
+      uint32_t gpio_periph_enable,
+      uint32_t gpio_port,
+      uint16_t gpio_pin){
+  if(ctx->servo_count>MAX_SERVO_COUNT){
+    return;
+  }
+  pwm_timer_servo_init(&ctx->servos[ctx->servo_count++].pwm_timer, timer,
+        oc_id, gpio_peripheral_register, gpio_periph_enable, gpio_port, gpio_pin);
+}
+
 void control_context_create_servos(servo_usb_control_context_t *ctx){
-    pwm_timer_servo_init(&ctx->servos[0].pwm_timer, &ctx->timer2,
+  add_timer_pwm_servo(ctx, &ctx->timer2,
         TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH1_ETR);//PA0
 
     //TODO: fix duplicate peripheral init
-    pwm_timer_servo_init(&ctx->servos[1].pwm_timer, &ctx->timer2,
+  add_timer_pwm_servo(ctx, &ctx->timer2,
         TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH2);//PA1
 
-    pwm_timer_servo_init(&ctx->servos[2].pwm_timer, &ctx->timer3,
+  /*add_timer_pwm_servo(ctx, &ctx->timer3,
         TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM3_CH1);//PA6
 
-    pwm_timer_servo_init(&ctx->servos[3].pwm_timer, &ctx->timer3,
+  add_timer_pwm_servo(ctx, &ctx->timer3,
         TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH2);//PA7
 
 
-    pwm_timer_servo_init(&ctx->servos[4].pwm_timer, &ctx->timer4,
+  add_timer_pwm_servo(ctx, &ctx->timer4,
         TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOB, GPIO_TIM4_CH1); //PB6
 
-    pwm_timer_servo_init(&ctx->servos[5].pwm_timer, &ctx->timer4,
+  add_timer_pwm_servo(ctx, &ctx->timer4,
         TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOB, GPIO_TIM4_CH2);//PB7
+*/
 
-
-    pwm_timer_servo_init(&ctx->servos[6].pwm_timer, &ctx->timer2,
+  add_timer_pwm_servo(ctx, &ctx->timer2,
         TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH3);//PA2
 
-    pwm_timer_servo_init(&ctx->servos[7].pwm_timer, &ctx->timer2,
+  add_timer_pwm_servo(ctx, &ctx->timer2,
         TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH4);//PA3
 
-    ctx->servo_count = SERVO_COUNT;
+
+  add_timer_pwm_servo(ctx, &ctx->timer1,
+        TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH1);//PA8
+
+  add_timer_pwm_servo(ctx, &ctx->timer1,
+        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH2);//PA9
+
+/*
+  add_timer_pwm_servo(ctx, &ctx->timer1,
+        TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH3);//PA10
+
+  add_timer_pwm_servo(ctx, &ctx->timer1,
+        TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH4);//PA11*/
+
 }

@@ -6,7 +6,7 @@
 #include "pwm_timer_servo.h"
 
 
-#define SERVO_COUNT 8
+#define MAX_SERVO_COUNT 18
 
 
 typedef union multi_servo_u {
@@ -20,6 +20,7 @@ typedef struct servo_usb_control_context_s {
 
     usb_cdcacm_context_t usb;
 
+    pwm_timer_desc_t timer1;
     pwm_timer_desc_t timer2;
     pwm_timer_desc_t timer3;
     pwm_timer_desc_t timer4;
@@ -34,7 +35,7 @@ typedef struct servo_usb_control_context_s {
 
     int servo_count;
 
-    multi_servo_t servos[SERVO_COUNT];
+    multi_servo_t servos[MAX_SERVO_COUNT];
 
 } servo_usb_control_context_t;
 
