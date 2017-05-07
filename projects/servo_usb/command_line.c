@@ -8,6 +8,8 @@
 #include "control_context.h"
 #include "blink.h"
 
+#include "multi_servo.h"
+
 static void CLI_blink_switch(servo_usb_control_context_t *ctx, int on){
   (void) ctx;
   blink_switch(on);
@@ -16,16 +18,16 @@ static void CLI_blink_switch(servo_usb_control_context_t *ctx, int on){
 
 //set limits for servo
 static void cli_LIMITS(servo_usb_control_context_t *ctx, int p1, int p2) {
-  char out[80];
+  //char out[80];
 
   if (p1<500 || p1>1000)  {
-    printf(out, "ERROR: invalid low limit %d. min:%lu max:%lu\n",
+    printf("ERROR: invalid low limit %d. min:%lu max:%lu\n",
       p1, ctx->servo_pos_min, ctx->servo_pos_max);
     //print(out);
     return;
   }
   if (p2<2000 || p2>2500)  {
-    printf(out, "ERROR: invalid high limit %d. min:%lu max:%lu\n",
+    printf("ERROR: invalid high limit %d. min:%lu max:%lu\n",
       p2, ctx->servo_pos_min, ctx->servo_pos_max);
     //print(out);
     return;
@@ -34,54 +36,52 @@ static void cli_LIMITS(servo_usb_control_context_t *ctx, int p1, int p2) {
   ctx->servo_pos_min = p1;
   ctx->servo_pos_max = p2;
 
-  printf(out, "min:%lu max:%lu\n", ctx->servo_pos_min, ctx->servo_pos_max);
+  printf("min:%lu max:%lu\n", ctx->servo_pos_min, ctx->servo_pos_max);
   //print(out);
 }
 
 
 static void cli_DUMP(servo_usb_control_context_t *ctx) {
-  char out[80];
-  uint32_t pos_ch1 = 0;//servo_get_position(SERVO_CH1);
-  uint32_t pos_ch2 = 0;//servo_get_position(SERVO_CH2);
-
-  printf(out, "ch1:%lu  ch2: %lu min:%lu max:%lu\n",
-    pos_ch1, pos_ch2, ctx->servo_pos_min, ctx->servo_pos_max);
-  //print(out);
+  //char out[80];
+  int i;
+  uint32_t us_pos;
+  for(i=0;i<ctx->servo_count;i++){
+    int rc = multiservo_get_position(&ctx->servos[i].servo, &us_pos);
+    printf("get ch:%d pos:%lu rc:%d\n", i, us_pos, rc);
+    delay(10000);
+  }
 }
 
 
 //set servo position
 static void cli_SET(servo_usb_control_context_t *ctx, int p1, int p2) {
-  (void) ctx;
-  char out[80];
-  uint32_t real_pos = 0;
-  /*outlen = */printf(out, "servo:%d value:%d\n", p1, p2);
+  //char out[80];
+  uint32_t us_pos = (uint32_t)p2;
+  /*outlen = */printf("servo:%d value:%lu\n", p1, us_pos);
   //print(out);
 
-  switch(p1){
-     case 1:
-       //real_pos = servo_set_position_limits(SERVO_CH1, p2, servo_pos_min, servo_pos_max);
-       break;
-     case 2:
-       //real_pos = servo_set_position_limits(SERVO_CH2, p2, servo_pos_min, servo_pos_max);
-       break;
-     default:
-       /*outlen = */printf(out, "WARN: servo number error. servo:%d value:%d\n", p1, p2);
-       //print(out);
-       break;
+  if (p1<0 || p1>=ctx->servo_count) {
+    printf("invalid servo num %d\n", p1);
+    return;
   }
-  if(real_pos!=0){
-    printf(out, "set %lu\n", real_pos);
-    //print(out);
+  if(us_pos<ctx->servo_pos_min) {
+    printf("position %lu less than min %lu\n", us_pos, ctx->servo_pos_min);
+    us_pos = ctx->servo_pos_min;
   }
+  if(us_pos>ctx->servo_pos_max) {
+    printf("position %lu greater than max %lu\n", us_pos, ctx->servo_pos_max);
+    us_pos = ctx->servo_pos_max;
+  }
+  int rc = multiservo_set_position(&ctx->servos[p1].servo, us_pos);
+  printf("set ch:%d pos:%lu rc:%d\n", p1, us_pos, rc);
 }
 
 
 static void cli_ROTATE(servo_usb_control_context_t *ctx, int p1, int p2) {
   (void) ctx;
-  char out[80];
+  //char out[80];
   uint32_t real_pos = 0;
-  printf(out, "rotate servo:%d angle(ms):%d\n", p1, p2);
+  printf("rotate servo:%d angle(ms):%d\n", p1, p2);
   //print(out);
 
   switch(p1){
@@ -92,12 +92,12 @@ static void cli_ROTATE(servo_usb_control_context_t *ctx, int p1, int p2) {
        //real_pos = servo_rotate_limits(SERVO_CH2, p2, servo_pos_min, servo_pos_max);
        break;
      default:
-       printf("WARN: servo number error: %d", p1);
+       printf("WARN: servo number error: %d\n", p1);
        //print(out);
        break;
   }
   if(real_pos!=0){
-    printf(out, "position %lu\n", real_pos);
+    printf("position %lu\n", real_pos);
     //print(out);
   }
 }

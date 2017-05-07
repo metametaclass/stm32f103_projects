@@ -1,10 +1,11 @@
 #include <libopencm3/stm32/rcc.h>
 #include <libopencm3/stm32/gpio.h>
+#include <string.h>
 
 #include "../../libs/macros.h"
 #include "../../libs/utils.h"
 
-//#include "../servo_pwm/servo.h"
+#include "../servo_pwm/servo_constants.h"
 #include "blink.h"
 
 
@@ -22,17 +23,11 @@ static void clock_init(void) {
 
 
 
-/*static void set_servos(uint32_t pos1_us, uint32_t pos2_us) {
-    gpio_toggle(GPIOC, GPIO13); //LED on/off
-    servo_set_position(SERVO_CH1, pos1_us);
-    servo_set_position(SERVO_CH2, pos2_us);
-}*/
-
-
 static void usb_print_callback(microrl_t *this, const char * str){
     servo_usb_control_context_t *ctx = container_of(this, servo_usb_control_context_t, readline);
     usb_prints(&ctx->usb, str);
 }
+
 
 
 
@@ -43,11 +38,14 @@ int main(void) {
     //init led blink
     blink_init();
 
-    servo_usb_control_context_t ctrl_context = {{0},{0},0,0,0};
+    servo_usb_control_context_t ctrl_context;
+    memset(&ctrl_context, 0, sizeof(ctrl_context));
 
     control_context_init(&ctrl_context);
 
-    //servo_init();
+    control_context_create_servos(&ctrl_context);
+
+    set_all_servos(&ctrl_context, SERVO_NULL);
     //set_servos(SERVO_NULL, SERVO_NULL);
 
     command_line_init(&ctrl_context.readline, usb_print_callback);
