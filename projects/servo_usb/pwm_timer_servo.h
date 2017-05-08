@@ -25,11 +25,15 @@ typedef struct pwm_timer_servo_desc_s {
 } pwm_timer_servo_desc_t;
 
 
+void pwm_timer_init_peripheral(pwm_timer_desc_t *timer);
+
 
 void pwm_timer_init(pwm_timer_desc_t *pwm_timer,
     volatile uint32_t *peripheral_register,
     uint32_t timer_peripheral,
-    uint32_t periph_enable);
+    uint32_t periph_enable,
+    uint32_t prescaler,
+    uint32_t period);
 
 
 void pwm_timer_start(pwm_timer_desc_t *pwm_timer);

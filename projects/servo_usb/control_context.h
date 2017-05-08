@@ -4,6 +4,7 @@
 #include "../../libs/microrl/microrl.h"
 #include "usb_cdcacm.h"
 #include "pwm_timer_servo.h"
+#include "softpwm_servo.h"
 
 
 #define MAX_SERVO_COUNT 18
@@ -12,6 +13,7 @@
 typedef union multi_servo_u {
     servo_desc_t servo;
     pwm_timer_servo_desc_t pwm_timer;
+    softpwm_servo_desc_t softpwm;
 } multi_servo_t;
 
 typedef struct servo_usb_control_context_s {
@@ -36,6 +38,9 @@ typedef struct servo_usb_control_context_s {
     int servo_count;
 
     multi_servo_t servos[MAX_SERVO_COUNT];
+
+    int softpwm_servo_count;
+    softpwm_servo_desc_t* softpwm_servos[MAX_SERVO_COUNT];
 
 } servo_usb_control_context_t;
 

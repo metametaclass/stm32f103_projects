@@ -9,7 +9,7 @@
 
 
 
-static void pwm_timer_init_peripheral(pwm_timer_desc_t *timer){
+void pwm_timer_init_peripheral(pwm_timer_desc_t *timer){
     if(timer->initialized){
         return;
     }
@@ -106,14 +106,16 @@ void pwm_timer_servo_init(pwm_timer_servo_desc_t *pwm_timer_servo,
 void pwm_timer_init(pwm_timer_desc_t *pwm_timer,
         volatile uint32_t *peripheral_register,
         uint32_t timer_peripheral,
-        uint32_t periph_enable){
+        uint32_t periph_enable,
+        uint32_t prescaler,
+        uint32_t period){
 
     pwm_timer->initialized = 0;
     pwm_timer->peripheral_register = peripheral_register;
     pwm_timer->timer_peripheral = timer_peripheral;
     pwm_timer->periph_enable = periph_enable;
-    pwm_timer->prescaler = PWM_PRESCALE;
-    pwm_timer->period = PWM_PERIOD;
+    pwm_timer->prescaler = prescaler;
+    pwm_timer->period = period;
 }
 
 

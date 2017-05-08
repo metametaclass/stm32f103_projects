@@ -11,8 +11,10 @@
 #include "control_context.h"
 #include "../servo_pwm/servo_constants.h"
 
-#include "pwm_timer_servo.h"
 #include "multi_servo.h"
+#include "pwm_timer_servo.h"
+#include "softpwm_servo.h"
+
 #include "blink.h"
 
 
@@ -84,21 +86,30 @@ void set_all_servos(servo_usb_control_context_t *ctx, uint32_t us_pos){
   }
 }
 
+
 volatile uint32_t irq_counter;
+static servo_usb_control_context_t *global_context;//for ISR
 
 void tim1_up_isr(void){
   if (timer_get_flag(TIM1, TIM_SR_UIF)) {
     timer_clear_flag(TIM1, TIM_SR_UIF);
     irq_counter++;
-    if(irq_counter>=25){
+    if(irq_counter>=1000000){
       //gpio_clear(GPIOC, GPIO13);
       led_toggle();
       irq_counter=0;
+
+      int i;
+      for(i=0;i<global_context->softpwm_servo_count;i++){
+        softpwm_servo_desc_t *servo = global_context->softpwm_servos[i];
+        gpio_toggle(servo->gpio_port, servo->gpio_pin);
+      }
     }
   }
 
 }
 
+/*
 void tim2_isr(void){
   if (timer_get_flag(TIM2, TIM_SR_UIF)) {
     timer_clear_flag(TIM2, TIM_SR_UIF);
@@ -109,17 +120,21 @@ void tim2_isr(void){
       irq_counter=0;
     }
   }
-
 }
+*/
 
 void control_context_init(servo_usb_control_context_t *ctx){
+  global_context = ctx;
   ctx->servo_pos_min = SERVO_MIN;
   ctx->servo_pos_max = SERVO_MAX;
 
-  pwm_timer_init(&ctx->timer1, &RCC_APB2ENR, TIM1, RCC_APB2ENR_TIM1EN);
-  pwm_timer_init(&ctx->timer2, &RCC_APB1ENR, TIM2, RCC_APB1ENR_TIM2EN);
-  pwm_timer_init(&ctx->timer3, &RCC_APB1ENR, TIM3, RCC_APB1ENR_TIM3EN);
-  pwm_timer_init(&ctx->timer4, &RCC_APB1ENR, TIM4, RCC_APB1ENR_TIM4EN);
+  //softpwm
+  pwm_timer_init(&ctx->timer1, &RCC_APB2ENR, TIM1, RCC_APB2ENR_TIM1EN, 71, 1);
+
+  //timer_pwm
+  pwm_timer_init(&ctx->timer2, &RCC_APB1ENR, TIM2, RCC_APB1ENR_TIM2EN, PWM_PRESCALE, PWM_PERIOD);
+  pwm_timer_init(&ctx->timer3, &RCC_APB1ENR, TIM3, RCC_APB1ENR_TIM3EN, PWM_PRESCALE, PWM_PERIOD);
+  pwm_timer_init(&ctx->timer4, &RCC_APB1ENR, TIM4, RCC_APB1ENR_TIM4EN, PWM_PRESCALE, PWM_PERIOD);
 }
 
 
@@ -144,6 +159,7 @@ void control_context_start_timers(servo_usb_control_context_t *ctx){
   pwm_timer_start(&ctx->timer4);
 }
 
+
 static void add_timer_pwm_servo(servo_usb_control_context_t *ctx,
       pwm_timer_desc_t *timer,
       enum tim_oc_id oc_id,
@@ -157,6 +173,27 @@ static void add_timer_pwm_servo(servo_usb_control_context_t *ctx,
   pwm_timer_servo_init(&ctx->servos[ctx->servo_count++].pwm_timer, timer,
         oc_id, gpio_peripheral_register, gpio_periph_enable, gpio_port, gpio_pin);
 }
+
+
+
+static void add_softpwm_servo(servo_usb_control_context_t *ctx,
+      volatile uint32_t *gpio_peripheral_register,
+      uint32_t gpio_periph_enable,
+      uint32_t gpio_port,
+      uint16_t gpio_pin){
+  if(ctx->servo_count>MAX_SERVO_COUNT){
+    return;
+  }
+
+  pwm_timer_init_peripheral(&ctx->timer1);//init irq timer
+
+  softpwm_servo_desc_t *softpwm_servo = &ctx->servos[ctx->servo_count++].softpwm;
+  softpwm_servo_init(softpwm_servo,
+        gpio_peripheral_register, gpio_periph_enable, gpio_port, gpio_pin);
+  ctx->softpwm_servos[ctx->softpwm_servo_count++] = softpwm_servo;
+}
+
+
 
 void control_context_create_servos(servo_usb_control_context_t *ctx){
   //TODO: fix duplicate peripheral init
@@ -172,6 +209,11 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
 
   add_timer_pwm_servo(ctx, &ctx->timer3,
         TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM3_CH2);//PA7
+
+  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO4);//PA4
+
+  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO5);//PA5
+
 
   add_timer_pwm_servo(ctx, &ctx->timer4,
         TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH1);//PB6
@@ -200,6 +242,8 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
         TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH4);//PB9
 
 
+
+  /*
   add_timer_pwm_servo(ctx, &ctx->timer1,
         TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH1);//PA8
 
@@ -208,6 +252,7 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
 
   add_timer_pwm_servo(ctx, &ctx->timer1,
         TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH3);//PA10
+ */
 
   //used for usb
   //add_timer_pwm_servo(ctx, &ctx->timer1,
