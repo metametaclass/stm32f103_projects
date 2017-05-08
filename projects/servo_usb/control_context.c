@@ -225,28 +225,23 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
   add_timer_pwm_servo(ctx, &ctx->timer2,
         TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH2);//PA1
 
-  add_timer_pwm_servo(ctx, &ctx->timer3,
-        TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM3_CH1);//PA6
+  add_timer_pwm_servo(ctx, &ctx->timer2,
+        TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH3);//PA2
 
-  add_timer_pwm_servo(ctx, &ctx->timer3,
-        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM3_CH2);//PA7
+  add_timer_pwm_servo(ctx, &ctx->timer2,
+        TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH4);//PA3
+
 
   add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO4);//PA4
 
   add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO5);//PA5
 
 
-  add_timer_pwm_servo(ctx, &ctx->timer4,
-        TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH1);//PB6
+  add_timer_pwm_servo(ctx, &ctx->timer3,
+        TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM3_CH1);//PA6
 
-  add_timer_pwm_servo(ctx, &ctx->timer4,
-        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH2);//PB7
-
-  add_timer_pwm_servo(ctx, &ctx->timer2,
-        TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH3);//PA2
-
-  add_timer_pwm_servo(ctx, &ctx->timer2,
-        TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM2_CH4);//PA3
+  add_timer_pwm_servo(ctx, &ctx->timer3,
+        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM3_CH2);//PA7
 
 
   add_timer_pwm_servo(ctx, &ctx->timer3,
@@ -256,6 +251,23 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
         TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM3_CH4);//PB1
 
 
+  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO8);//PA8
+
+  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO9);//PA9
+
+  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO10);//PA10
+
+  //A11 used for USB
+
+  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO5);//PB5
+
+  add_timer_pwm_servo(ctx, &ctx->timer4,
+        TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH1);//PB6
+
+  add_timer_pwm_servo(ctx, &ctx->timer4,
+        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH2);//PB7
+
+
   add_timer_pwm_servo(ctx, &ctx->timer4,
         TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH3);//PB8
 
@@ -263,15 +275,11 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
         TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH4);//PB9
 
 
-  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO8);//PA8
-
-  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO9);//PA9
-
-  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO10);//PA10
-
-  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO5);//PB5
 
   /*
+  timer 1 can be used for 11-channel hardware pwm, but for 18 channel timer 1
+  is used for software pwm generation irq
+
   add_timer_pwm_servo(ctx, &ctx->timer1,
         TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH1);//PA8
 
