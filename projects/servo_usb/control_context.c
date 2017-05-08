@@ -87,24 +87,45 @@ void set_all_servos(servo_usb_control_context_t *ctx, uint32_t us_pos){
 }
 
 
+
 volatile uint32_t irq_counter;
+volatile uint32_t led_counter;
 static servo_usb_control_context_t *global_context;//for ISR
 
 void tim1_up_isr(void){
   if (timer_get_flag(TIM1, TIM_SR_UIF)) {
     timer_clear_flag(TIM1, TIM_SR_UIF);
     irq_counter++;
-    if(irq_counter>=1000000){
-      //gpio_clear(GPIOC, GPIO13);
-      led_toggle();
+    int i;
+
+    if(irq_counter>=SOFTPWM_PERIOD){
       irq_counter=0;
 
-      int i;
       for(i=0;i<global_context->softpwm_servo_count;i++){
         softpwm_servo_desc_t *servo = global_context->softpwm_servos[i];
-        gpio_toggle(servo->gpio_port, servo->gpio_pin);
+        servo->shadow_value = servo->value / SOFTPWM_DIVIDER;
+        gpio_set(servo->gpio_port, servo->gpio_pin);
+      }
+
+#ifdef SOFTPWM_LED_INTERVAL
+      led_counter++;
+      if(led_counter>SOFTPWM_LED_INTERVAL){
+        led_counter = 0;
+        led_toggle();
+      }
+#endif
+      return;
+    }
+
+
+    for(i=0;i<global_context->softpwm_servo_count;i++){
+      softpwm_servo_desc_t *servo = global_context->softpwm_servos[i];
+      if(irq_counter>servo->shadow_value){
+        servo->shadow_value = 0xFFFFFFFF;//mark as already set
+        gpio_clear(servo->gpio_port, servo->gpio_pin);
       }
     }
+
   }
 
 }
@@ -129,7 +150,7 @@ void control_context_init(servo_usb_control_context_t *ctx){
   ctx->servo_pos_max = SERVO_MAX;
 
   //softpwm
-  pwm_timer_init(&ctx->timer1, &RCC_APB2ENR, TIM1, RCC_APB2ENR_TIM1EN, 71, 1);
+  pwm_timer_init(&ctx->timer1, &RCC_APB2ENR, TIM1, RCC_APB2ENR_TIM1EN, SOFTPWM_PRESCALE, SOFTPWM_REPEAT);
 
   //timer_pwm
   pwm_timer_init(&ctx->timer2, &RCC_APB1ENR, TIM2, RCC_APB1ENR_TIM2EN, PWM_PRESCALE, PWM_PERIOD);
@@ -242,6 +263,13 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
         TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH4);//PB9
 
 
+  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO8);//PA8
+
+  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO9);//PA9
+
+  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO10);//PA10
+
+  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO5);//PB5
 
   /*
   add_timer_pwm_servo(ctx, &ctx->timer1,

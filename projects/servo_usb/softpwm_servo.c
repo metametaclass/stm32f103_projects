@@ -40,6 +40,7 @@ void softpwm_servo_init(softpwm_servo_desc_t *softpwm_servo,
     softpwm_servo->gpio_pin = gpio_pin;
 
     softpwm_servo->value = SERVO_NULL;
+    softpwm_servo->shadow_value = SERVO_NULL / SOFTPWM_DIVIDER;
 
     multiservo_init(&softpwm_servo->servo,
         softpwm_servo_set_position, softpwm_servo_get_position,
