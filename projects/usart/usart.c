@@ -46,8 +46,7 @@ struct ring output_ring;
 uint8_t output_ring_buffer[BUFFER_SIZE];
 
 
-static void usart_setup(void)
-{
+static void usart_setup(void) {
   /* Initialize output ring buffer. */
   ring_init(&output_ring, output_ring_buffer, BUFFER_SIZE);
 
@@ -77,18 +76,20 @@ static void usart_setup(void)
   usart_enable(USART3);
 }
 
-/*
-void usart3_isr(void)
-{
+
+//ringbuffer example
+
+void usart3_isr(void) {
   // Check if we were called because of RXNE.
   if (((USART_CR1(USART3) & USART_CR1_RXNEIE) != 0) &&
       ((USART_SR(USART3) & USART_SR_RXNE) != 0)) {
 
     // Indicate that we got data.
-    //gpio_toggle(GPIOC, GPIO13);
+    gpio_toggle(GPIOC, GPIO13);
 
     // Retrieve the data from the peripheral.
-    ring_write_ch(&output_ring, usart_recv(USART3));
+    uint8_t data = usart_recv(USART3);
+    ring_write_ch(&output_ring, data);
 
     // Enable transmit interrupt so it sends back the data.
     USART_CR1(USART3) |= USART_CR1_TXEIE;
@@ -99,7 +100,7 @@ void usart3_isr(void)
       ((USART_SR(USART3) & USART_SR_TXE) != 0)) {
 
     int32_t data;
-    gpio_toggle(GPIOC, GPIO13);
+    //gpio_toggle(GPIOC, GPIO13);
 
     data = ring_read_ch(&output_ring, NULL);
 
@@ -111,9 +112,11 @@ void usart3_isr(void)
       usart_send(USART3, data);
     }
   }
-} */
+}
 
 
+//echo example
+/*
 void usart3_isr(void) {
   static uint8_t data = 'A';
 
@@ -145,6 +148,7 @@ void usart3_isr(void) {
     usart_send(USART3, data);
   }
 }
+*/
 
 /*
 int _write(int file, char *ptr, int len)

@@ -9,10 +9,10 @@
 typedef int32_t ring_size_t;
 
 struct ring {
-  uint8_t *data;
+  volatile uint8_t *data;
   ring_size_t size;
-  uint32_t begin;
-  uint32_t end;
+  volatile uint32_t begin;
+  volatile uint32_t end;
 };
 
 void ring_init(struct ring *ring, uint8_t *buf, ring_size_t size);
