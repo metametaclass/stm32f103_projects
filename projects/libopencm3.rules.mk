@@ -126,7 +126,7 @@ LDLIBS		+= -Wl,--start-group -lc -lgcc -lnosys -Wl,--end-group
 .SECONDEXPANSION:
 .SECONDARY:
 
-all: elf sizes list
+all: elf sizes hex list
 
 elf: $(BINARY).elf
 bin: $(BINARY).bin
