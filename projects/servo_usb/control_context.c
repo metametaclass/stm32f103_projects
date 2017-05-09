@@ -209,6 +209,7 @@ void control_context_init(servo_usb_control_context_t *ctx){
   //pwm_timer_init(&ctx->timer1, &RCC_APB2ENR, TIM1, RCC_APB2ENR_TIM1EN, SOFTPWM_PRESCALE, SOFTPWM_REPEAT);
 
   //timer_pwm
+  pwm_timer_init(&ctx->timer1, &RCC_APB2ENR, TIM1, RCC_APB2ENR_TIM1EN, PWM_PRESCALE, PWM_PERIOD);
   pwm_timer_init(&ctx->timer2, &RCC_APB1ENR, TIM2, RCC_APB1ENR_TIM2EN, PWM_PRESCALE, PWM_PERIOD);
   pwm_timer_init(&ctx->timer3, &RCC_APB1ENR, TIM3, RCC_APB1ENR_TIM3EN, PWM_PRESCALE, PWM_PERIOD);
   pwm_timer_init(&ctx->timer4, &RCC_APB1ENR, TIM4, RCC_APB1ENR_TIM4EN, PWM_PRESCALE, PWM_PERIOD);
@@ -223,10 +224,9 @@ void control_context_start_timers(servo_usb_control_context_t *ctx){
   nvic_set_priority(NVIC_TIM1_UP_IRQ, 1);*/
 
   //timer_enable_preload_complementry_enable_bits(TIM1);
-  //timer_enable_break_main_output(TIM1);
+  timer_enable_break_main_output(TIM1);
 
-
-  //pwm_timer_start(&ctx->timer1);
+  pwm_timer_start(&ctx->timer1);
   pwm_timer_start(&ctx->timer2);
   pwm_timer_start(&ctx->timer3);
   pwm_timer_start(&ctx->timer4);
@@ -303,11 +303,14 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
         TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM3_CH4);//PB1
 
 
-  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO8);//PA8
+  add_timer_pwm_servo(ctx, &ctx->timer1,
+        TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH1);//PA8
 
-  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO9);//PA9
+  add_timer_pwm_servo(ctx, &ctx->timer1,
+        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH2);//PA9
 
-  add_softpwm_servo(ctx, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO10);//PA10
+  add_timer_pwm_servo(ctx, &ctx->timer1,
+        TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH3);//PA10
 
   //A11 used for USB
 
@@ -327,20 +330,6 @@ void control_context_create_servos(servo_usb_control_context_t *ctx){
         TIM_OC4, &RCC_APB2ENR, RCC_APB2ENR_IOPBEN, GPIOB, GPIO_TIM4_CH4);//PB9
 
 
-
-  /*
-  timer 1 can be used for 11-channel hardware pwm, but for 18 channel timer 1
-  is used for software pwm generation irq
-
-  add_timer_pwm_servo(ctx, &ctx->timer1,
-        TIM_OC1, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH1);//PA8
-
-  add_timer_pwm_servo(ctx, &ctx->timer1,
-        TIM_OC2, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH2);//PA9
-
-  add_timer_pwm_servo(ctx, &ctx->timer1,
-        TIM_OC3, &RCC_APB2ENR, RCC_APB2ENR_IOPAEN, GPIOA, GPIO_TIM1_CH3);//PA10
- */
 
   //used for usb
   //add_timer_pwm_servo(ctx, &ctx->timer1,
