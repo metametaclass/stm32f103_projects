@@ -62,7 +62,7 @@ static void usart_setup(void) {
           GPIO_CNF_INPUT_FLOAT, GPIO_USART3_RX);
 
   /* Setup UART parameters. */
-  usart_set_baudrate(USART3, 9600);
+  usart_set_baudrate(USART3, 115200);
   usart_set_databits(USART3, 8);
   usart_set_stopbits(USART3, USART_STOPBITS_1);
   usart_set_parity(USART3, USART_PARITY_NONE);
@@ -151,7 +151,7 @@ void usart3_isr(void) {
 */
 
 //10 Hz = 1000/100
-#define EVENT_INTERVAL 100
+#define EVENT_INTERVAL 10
 #define LED_1SEC (1000/EVENT_INTERVAL)
 
 static volatile int32_t led;
