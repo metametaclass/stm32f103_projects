@@ -5,6 +5,7 @@
 #include <libopencm3/stm32/gpio.h>
 
 #include <libopencm3/cm3/nvic.h>
+#include <libopencm3/cm3/systick.h>
 
 #include "../../libs/macros.h"
 
@@ -87,10 +88,12 @@ void set_all_servos(servo_usb_control_context_t *ctx, uint32_t us_pos){
 }
 
 
+static servo_usb_control_context_t *global_context;//for ISR
 
+/*
 volatile uint32_t irq_counter;
 volatile uint32_t led_counter;
-static servo_usb_control_context_t *global_context;//for ISR
+
 
 void tim1_up_isr(void){
   if (timer_get_flag(TIM1, TIM_SR_UIF)) {
@@ -129,6 +132,59 @@ void tim1_up_isr(void){
   }
 
 }
+*/
+
+static void systick_setup(void) {
+  /* 72MHz / 8 => 9000000 counts per second. */
+  systick_set_clocksource(STK_CSR_CLKSOURCE_AHB_DIV8);
+
+  /* 9000000/90 = 100000 overflows per second - every 10us one interrupt */
+  /* SysTick interrupt every N clock pulses: set reload to N-1 */
+  systick_set_reload(89);
+
+  systick_interrupt_enable();
+
+  /* Start counting. */
+  systick_counter_enable();
+}
+
+
+void sys_tick_handler(void) {
+  static uint32_t irq_counter = 0;
+  static uint32_t led_counter = 0;
+
+  irq_counter++;
+  int i;
+
+  if(irq_counter>=SOFTPWM_PERIOD){
+    irq_counter=0;
+
+    for(i=0;i<global_context->softpwm_servo_count;i++){
+      softpwm_servo_desc_t *servo = global_context->softpwm_servos[i];
+      servo->shadow_value = servo->value / SOFTPWM_DIVIDER;
+      gpio_set(servo->gpio_port, servo->gpio_pin);
+    }
+
+#ifdef SOFTPWM_LED_INTERVAL
+    led_counter++;
+    if(led_counter>SOFTPWM_LED_INTERVAL){
+      led_counter = 0;
+      led_toggle();
+    }
+#endif
+    return;
+  }
+
+  for(i=0;i<global_context->softpwm_servo_count;i++){
+    softpwm_servo_desc_t *servo = global_context->softpwm_servos[i];
+    if(irq_counter>servo->shadow_value){
+      servo->shadow_value = 0xFFFFFFFF;//mark as already set
+      gpio_clear(servo->gpio_port, servo->gpio_pin);
+    }
+  }
+
+}
+
 
 /*
 void tim2_isr(void){
@@ -150,7 +206,7 @@ void control_context_init(servo_usb_control_context_t *ctx){
   ctx->servo_pos_max = SERVO_MAX;
 
   //softpwm
-  pwm_timer_init(&ctx->timer1, &RCC_APB2ENR, TIM1, RCC_APB2ENR_TIM1EN, SOFTPWM_PRESCALE, SOFTPWM_REPEAT);
+  //pwm_timer_init(&ctx->timer1, &RCC_APB2ENR, TIM1, RCC_APB2ENR_TIM1EN, SOFTPWM_PRESCALE, SOFTPWM_REPEAT);
 
   //timer_pwm
   pwm_timer_init(&ctx->timer2, &RCC_APB1ENR, TIM2, RCC_APB1ENR_TIM2EN, PWM_PRESCALE, PWM_PERIOD);
@@ -161,20 +217,16 @@ void control_context_init(servo_usb_control_context_t *ctx){
 
 void control_context_start_timers(servo_usb_control_context_t *ctx){
 
-  irq_counter = 0;
-  nvic_enable_irq(NVIC_TIM1_UP_IRQ);
+  systick_setup();
+  /*nvic_enable_irq(NVIC_TIM1_UP_IRQ);
   timer_enable_irq(TIM1, TIM_DIER_UIE);
-  nvic_set_priority(NVIC_TIM1_UP_IRQ, 1);
+  nvic_set_priority(NVIC_TIM1_UP_IRQ, 1);*/
 
   //timer_enable_preload_complementry_enable_bits(TIM1);
-  timer_enable_break_main_output(TIM1);
+  //timer_enable_break_main_output(TIM1);
 
 
-  //nvic_enable_irq(NVIC_TIM2_IRQ);
-  //nvic_set_priority(NVIC_TIM2_IRQ, 1);
-  //timer_enable_irq(TIM2, TIM_DIER_UIE);
-
-  pwm_timer_start(&ctx->timer1);
+  //pwm_timer_start(&ctx->timer1);
   pwm_timer_start(&ctx->timer2);
   pwm_timer_start(&ctx->timer3);
   pwm_timer_start(&ctx->timer4);
@@ -206,7 +258,7 @@ static void add_softpwm_servo(servo_usb_control_context_t *ctx,
     return;
   }
 
-  pwm_timer_init_peripheral(&ctx->timer1);//init irq timer
+  //pwm_timer_init_peripheral(&ctx->timer1);//init irq timer
 
   softpwm_servo_desc_t *softpwm_servo = &ctx->servos[ctx->servo_count++].softpwm;
   softpwm_servo_init(softpwm_servo,
