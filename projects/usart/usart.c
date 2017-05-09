@@ -52,7 +52,7 @@ static void usart_setup(void)
   ring_init(&output_ring, output_ring_buffer, BUFFER_SIZE);
 
   /* Enable the USART3 interrupt. */
-  //nvic_enable_irq(NVIC_USART3_IRQ);
+  nvic_enable_irq(NVIC_USART3_IRQ);
 
   /* Setup GPIO pin GPIO_USART3_TX on GPIO port B for transmit. */
   gpio_set_mode(GPIOB, GPIO_MODE_OUTPUT_50_MHZ,
@@ -71,7 +71,7 @@ static void usart_setup(void)
   usart_set_mode(USART3, USART_MODE_TX_RX);
 
   /* Enable USART3 Receive interrupt. */
-  //USART_CR1(USART3) |= USART_CR1_RXNEIE;
+  USART_CR1(USART3) |= USART_CR1_RXNEIE;
 
   /* Finally enable the USART. */
   usart_enable(USART3);
@@ -114,7 +114,6 @@ void usart3_isr(void)
 } */
 
 
-/*
 void usart3_isr(void) {
   static uint8_t data = 'A';
 
@@ -123,7 +122,7 @@ void usart3_isr(void) {
       ((USART_SR(USART3) & USART_SR_RXNE) != 0)) {
 
     // Indicate that we got data.
-    gpio_set(GPIOC, GPIO13);
+    gpio_toggle(GPIOC, GPIO13);
 
     // Retrieve the data from the peripheral.
     data = usart_recv(USART3);
@@ -136,18 +135,18 @@ void usart3_isr(void) {
   if (((USART_CR1(USART3) & USART_CR1_TXEIE) != 0) &&
       ((USART_SR(USART3) & USART_SR_TXE) != 0)) {
 
+    // Disable the TXE interrupt as we don't need it anymore.
+    USART_CR1(USART3) &= ~USART_CR1_TXEIE;
+
     // Indicate that we are sending out data.
-    gpio_clear(GPIOC, GPIO13);
+    gpio_toggle(GPIOC, GPIO13);
 
     //  Put data into the transmit register.
     usart_send(USART3, data);
-
-    // Disable the TXE interrupt as we don't need it anymore.
-    USART_CR1(USART3) &= ~USART_CR1_TXEIE;
   }
-}*/
+}
 
-
+/*
 int _write(int file, char *ptr, int len)
 {
   int ret;
@@ -166,6 +165,7 @@ int _write(int file, char *ptr, int len)
   errno = EIO;
   return -1;
 }
+*/
 
 static void systick_setup(void)
 {
@@ -189,26 +189,40 @@ void sys_tick_handler(void)
   static double dcounter = 0.0;
   static uint32_t temp32 = 0;
   static uint32_t led = 0;
+  static int c;
+
+  int ret;
 
   temp32++;
 
   /*
    * We call this handler every 1ms so we are sending hello world
-   * every 10ms / 100Hz.
+   * every 100ms / 10Hz.
    */
   if (temp32 == 100) {
+    temp32 = 0;
     //printf("Hello World! %i %f %f\r\n", counter, fcounter, dcounter);
     counter++;
     fcounter += 0.01;
     dcounter += 0.01;
-    //char tx[9] = "abcdef\r\n";
 
-    temp32 = 0;
+    char tx = c + '0';
+
+    ret = ring_write_ch(&output_ring, tx);
+    c = (c == 9) ? 0 : c + 1;//next digit
+    if(( counter++ % 80) == 0){
+      ret = ring_write_ch(&output_ring, '\r');
+      ret = ring_write_ch(&output_ring, '\n');
+    }
+    //enable write
+    USART_CR1(USART3) |= USART_CR1_TXEIE;
+
+
     led++;
     if(led == 5){
       //gpio_clear(GPIOC, GPIO13);
       //ret = ring_write(&output_ring, tx, 8);
-      //gpio_toggle(GPIOC, GPIO13);
+      gpio_toggle(GPIOC, GPIO13);
       led = 0;
     }
   }
@@ -217,7 +231,7 @@ void sys_tick_handler(void)
 
 int main(void){
 
-  int i, j = 0, c = 0;
+
 
   clock_setup();
   gpio_setup();
@@ -226,22 +240,26 @@ int main(void){
   //systick_setup();
 
 
+  //simple mode
+  /*
+  int i, j = 0, c = 0;
 
-  // Blink the LED (PA8) on the board with every transmitted byte.
   while (1) {
+    // Blink the LED (PC13) on the board with every transmitted byte.
     gpio_toggle(GPIOC, GPIO13);  // LED on/off
-    usart_send_blocking(USART3, c + '0'); /* USART2: Send byte. */
-    c = (c == 9) ? 0 : c + 1; /* Increment c. */
-    if ((j++ % 80) == 0) {  /* Newline after line full. */
+    usart_send_blocking(USART3, c + '0'); // USART2: Send byte.
+    c = (c == 9) ? 0 : c + 1; // Increment c.
+    if ((j++ % 80) == 0) {  // Newline after line full.
       usart_send_blocking(USART3, '\r');
       usart_send_blocking(USART3, '\n');
     }
-    for (i = 0; i < 800000; i++)  /* Wait a bit. */
+    for (i = 0; i < 800000; i++)  // Wait a bit.
       __asm__("nop");
-  }
+  }*/
 
-  //while (1)
-  //  __asm__("nop");
+  while(1) {
+    __asm__("nop");
+  }
 
 }
 
