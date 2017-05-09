@@ -25,7 +25,7 @@
 
 static void gpio_setup(void)
 {
-  /* Enable GPIOB clock. */
+  /* Enable GPIOC clock. */
   rcc_periph_clock_enable(RCC_GPIOC);
 
   /* Set GPIO13 (in GPIO port C) to 'output push-pull' for the LEDs. */
