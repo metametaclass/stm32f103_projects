@@ -85,7 +85,7 @@ void usart3_isr(void) {
       ((USART_SR(USART3) & USART_SR_RXNE) != 0)) {
 
     // Indicate that we got data.
-    gpio_toggle(GPIOC, GPIO13);
+    //gpio_toggle(GPIOC, GPIO13);
 
     // Retrieve the data from the peripheral.
     uint8_t data = usart_recv(USART3);
@@ -186,13 +186,19 @@ static void systick_setup(void)
   systick_counter_enable();
 }
 
+
+//10 Hz = 1000/100
+#define EVENT_INTERVAL 100
+#define LED_1SEC (1000/EVENT_INTERVAL)
+
+static volatile int32_t led;
+
 void sys_tick_handler(void)
 {
   static int counter = 0;
   static float fcounter = 0.0;
   static double dcounter = 0.0;
   static uint32_t temp32 = 0;
-  static uint32_t led = 0;
   static int c;
 
   int ret;
@@ -203,7 +209,7 @@ void sys_tick_handler(void)
    * We call this handler every 1ms so we are sending hello world
    * every 100ms / 10Hz.
    */
-  if (temp32 == 100) {
+  if (temp32 == EVENT_INTERVAL) {
     temp32 = 0;
     //printf("Hello World! %i %f %f\r\n", counter, fcounter, dcounter);
     counter++;
@@ -213,35 +219,47 @@ void sys_tick_handler(void)
     char tx = c + '0';
 
     ret = ring_write_ch(&output_ring, tx);
+    if(ret == -1){
+      led = LED_1SEC;
+      gpio_clear(GPIOC, GPIO13);
+    }
     c = (c == 9) ? 0 : c + 1;//next digit
-    if(( counter++ % 80) == 0){
+    if( (counter % 80) == 0){
       ret = ring_write_ch(&output_ring, '\r');
+      if(ret == -1){
+        led = LED_1SEC;
+        gpio_clear(GPIOC, GPIO13);
+      }
       ret = ring_write_ch(&output_ring, '\n');
+      if(ret == -1){
+        led = LED_1SEC;
+        gpio_clear(GPIOC, GPIO13);
+      }
     }
     //enable write
     USART_CR1(USART3) |= USART_CR1_TXEIE;
 
-
-    led++;
-    if(led == 5){
-      //gpio_clear(GPIOC, GPIO13);
-      //ret = ring_write(&output_ring, tx, 8);
-      gpio_toggle(GPIOC, GPIO13);
-      led = 0;
+    if(led>0){
+      led--;
+      if(led==0){
+        gpio_set(GPIOC, GPIO13);
+      }
     }
+
   }
 }
 
 
 int main(void){
-
-
-
   clock_setup();
   gpio_setup();
+
+  led = 10;
+
   usart_setup();
-  gpio_set(GPIOC, GPIO13);
-  //systick_setup();
+  systick_setup();
+
+  gpio_clear(GPIOC, GPIO13);
 
 
   //simple mode
