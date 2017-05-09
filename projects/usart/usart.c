@@ -150,7 +150,13 @@ void usart3_isr(void) {
 }
 */
 
-/*
+//10 Hz = 1000/100
+#define EVENT_INTERVAL 100
+#define LED_1SEC (1000/EVENT_INTERVAL)
+
+static volatile int32_t led;
+
+
 int _write(int file, char *ptr, int len)
 {
   int ret;
@@ -158,8 +164,13 @@ int _write(int file, char *ptr, int len)
   if (file == 1) {
     ret = ring_write(&output_ring, (uint8_t *)ptr, len);
 
-    if (ret < 0)
+    if (ret < 0) {
       ret = -ret;
+
+      //notify error
+      led = LED_1SEC;
+      gpio_clear(GPIOC, GPIO13);
+    }
 
     USART_CR1(USART3) |= USART_CR1_TXEIE;
 
@@ -169,7 +180,7 @@ int _write(int file, char *ptr, int len)
   errno = EIO;
   return -1;
 }
-*/
+
 
 static void systick_setup(void)
 {
@@ -187,11 +198,6 @@ static void systick_setup(void)
 }
 
 
-//10 Hz = 1000/100
-#define EVENT_INTERVAL 100
-#define LED_1SEC (1000/EVENT_INTERVAL)
-
-static volatile int32_t led;
 
 void sys_tick_handler(void)
 {
@@ -199,9 +205,8 @@ void sys_tick_handler(void)
   static float fcounter = 0.0;
   static double dcounter = 0.0;
   static uint32_t temp32 = 0;
-  static int c;
-
-  int ret;
+  //static int c;
+  //int ret;
 
   temp32++;
 
@@ -211,11 +216,12 @@ void sys_tick_handler(void)
    */
   if (temp32 == EVENT_INTERVAL) {
     temp32 = 0;
-    //printf("Hello World! %i %f %f\r\n", counter, fcounter, dcounter);
+    printf("Hello World! %i %f %f\r\n", counter, fcounter, dcounter);
     counter++;
     fcounter += 0.01;
     dcounter += 0.01;
 
+    /*
     char tx = c + '0';
 
     ret = ring_write_ch(&output_ring, tx);
@@ -238,6 +244,7 @@ void sys_tick_handler(void)
     }
     //enable write
     USART_CR1(USART3) |= USART_CR1_TXEIE;
+    */
 
     if(led>0){
       led--;
