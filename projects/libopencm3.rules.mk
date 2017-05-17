@@ -141,6 +141,8 @@ sizes: $(BINARY).elf
 images: $(BINARY).images
 flash: $(BINARY).flash
 
+flashwin: $(BINARY).flashwin
+
 $(LDSCRIPT):
     ifeq (,$(wildcard $(LDSCRIPT)))
         $(error Unable to find specified linker script: $(LDSCRIPT))
@@ -199,6 +201,10 @@ styleclean: $(STYLECHECKFILES:=.styleclean)
 
 %.styleclean:
 	$(Q)rm -f $*.stylecheck;
+
+%.flashwin: %.hex
+	@printf "  FLASH  $<\n"
+	$(Q)$(STLINKUTIL) -P $(*).hex -V
 
 
 %.stlink-flash: %.bin
