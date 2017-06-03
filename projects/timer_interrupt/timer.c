@@ -51,34 +51,75 @@ static void exti_setup(void)
   rcc_periph_clock_enable(RCC_AFIO);
 
   /* Enable EXTI0 interrupt. */
-  nvic_enable_irq(NVIC_EXTI0_IRQ);
+  nvic_enable_irq(NVIC_EXTI9_5_IRQ);
 
   /* Set GPIO0 (in GPIO port A) to 'input float'. */
-  gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_PULL_UPDOWN, GPIO0);
+  gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_PULL_UPDOWN, GPIO9 | GPIO8 | GPIO7 | GPIO6 | GPIO5 );
 
   //pull up
-  gpio_set(GPIOA, GPIO0);
+  gpio_set(GPIOA, GPIO9 | GPIO8 | GPIO7 | GPIO6 | GPIO5);
 
   /* Configure the EXTI subsystem. */
-  exti_select_source(EXTI0, GPIOA);
-  exti_set_trigger(EXTI0, EXTI_TRIGGER_BOTH);
-  exti_enable_request(EXTI0);
+  exti_select_source(EXTI9, GPIOA);
+  exti_select_source(EXTI8, GPIOA);
+  exti_select_source(EXTI7, GPIOA);
+  exti_select_source(EXTI6, GPIOA);
+  exti_select_source(EXTI5, GPIOA);
+
+  exti_set_trigger(EXTI9, EXTI_TRIGGER_BOTH);
+  exti_set_trigger(EXTI8, EXTI_TRIGGER_BOTH);
+  exti_set_trigger(EXTI7, EXTI_TRIGGER_BOTH);
+  exti_set_trigger(EXTI6, EXTI_TRIGGER_BOTH);
+  exti_set_trigger(EXTI5, EXTI_TRIGGER_BOTH);
+
+  exti_enable_request(EXTI9);
+  exti_enable_request(EXTI8);
+  exti_enable_request(EXTI7);
+  exti_enable_request(EXTI6);
+  exti_enable_request(EXTI5);
 }
 
 
-void exti0_isr(void){
+void exti9_5_isr(void){
 
+  /*
   uint16_t exti_line_state = GPIOA_IDR;
 
-  /* The LED (PC12) is on, but turns off when the button is pressed. */
+  // The LED (PC12) is on, but turns off when the button is pressed.
   if ((exti_line_state & (1 << 0)) != 0) {
     timer_set_period(TIM2, 25000);
   } else {
     timer_set_period(TIM2, 6250);
   }
+  exti_reset_request(EXTI0);*/
 
-  exti_reset_request(EXTI0);
+  if(exti_get_flag_status(EXTI5)){
+    timer_set_period(TIM2, 2000);
+    exti_reset_request(EXTI5);
+  }
+
+  if(exti_get_flag_status(EXTI6)){
+    timer_set_period(TIM2, 4000);
+    exti_reset_request(EXTI6);
+  }
+
+  if(exti_get_flag_status(EXTI7)){
+    timer_set_period(TIM2, 8000);
+    exti_reset_request(EXTI7);
+  }
+
+  if(exti_get_flag_status(EXTI8)){
+    timer_set_period(TIM2, 16000);
+    exti_reset_request(EXTI8);
+  }
+
+  if(exti_get_flag_status(EXTI9)){
+    timer_set_period(TIM2, 32000);
+    exti_reset_request(EXTI9);
+  }
 }
+
+
 
 void tim2_isr(void)
 {
