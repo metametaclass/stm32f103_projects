@@ -22,6 +22,7 @@
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/timer.h>
 #include <libopencm3/cm3/nvic.h>
+#include <libopencm3/stm32/exti.h>
 
 static void gpio_setup(void)
 {
@@ -40,6 +41,45 @@ static void nvic_setup(void)
   //nvic_set_priority(NVIC_TIM2_IRQ, 1);
 }
 
+
+static void exti_setup(void)
+{
+  /* Enable GPIOA clock. */
+  rcc_periph_clock_enable(RCC_GPIOA);
+
+  /* Enable AFIO clock. */
+  rcc_periph_clock_enable(RCC_AFIO);
+
+  /* Enable EXTI0 interrupt. */
+  nvic_enable_irq(NVIC_EXTI0_IRQ);
+
+  /* Set GPIO0 (in GPIO port A) to 'input float'. */
+  gpio_set_mode(GPIOA, GPIO_MODE_INPUT, GPIO_CNF_INPUT_PULL_UPDOWN, GPIO0);
+
+  //pull up
+  gpio_set(GPIOA, GPIO0);
+
+  /* Configure the EXTI subsystem. */
+  exti_select_source(EXTI0, GPIOA);
+  exti_set_trigger(EXTI0, EXTI_TRIGGER_BOTH);
+  exti_enable_request(EXTI0);
+}
+
+
+void exti0_isr(void){
+
+  uint16_t exti_line_state = GPIOA_IDR;
+
+  /* The LED (PC12) is on, but turns off when the button is pressed. */
+  if ((exti_line_state & (1 << 0)) != 0) {
+    timer_set_period(TIM2, 25000);
+  } else {
+    timer_set_period(TIM2, 6250);
+  }
+
+  exti_reset_request(EXTI0);
+}
+
 void tim2_isr(void)
 {
 
@@ -56,12 +96,12 @@ void tim2_isr(void)
   //gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
   //TIM_SR(TIM2) &= ~TIM_SR_UIF; /* Clear interrupt flag. */
 
-  
+
   //clear without check, clear first
   //works
   //timer_clear_flag(TIM2, TIM_SR_UIF);
   //gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
-  
+
 
   //clear without check, LED first
   //doesn`t work (!)
@@ -70,21 +110,21 @@ void tim2_isr(void)
   //timer_clear_flag(TIM2, TIM_SR_UIF);
 
 
-  //paranoid version from timer_clear_flag above, clear first 
+  //paranoid version from timer_clear_flag above, clear first
   //works, order doesn`t matter
   //gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
   //TIM_SR(TIM2) = ~TIM_SR_UIF | (TIM_SR(TIM2) & 0xffffe0c0);
-  
+
   //copy of non-paranoid timer_clear_flag
-  //works, order doesn`t matter  
+  //works, order doesn`t matter
   //gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
   //TIM_SR(TIM2) = ~TIM_SR_UIF;
-   
+
 
   //check and clear
-  //works, order doesn`t matter  
+  //works, order doesn`t matter
   if (timer_get_flag(TIM2, TIM_SR_UIF)) {
-    gpio_toggle(GPIOC, GPIO13);   // LEDon/off.    
+    gpio_toggle(GPIOC, GPIO13);   // LEDon/off.
     timer_clear_flag(TIM2, TIM_SR_UIF);
   }
 }
@@ -92,8 +132,12 @@ void tim2_isr(void)
 int main(void)
 {
   rcc_clock_setup_in_hse_8mhz_out_72mhz();
+
   gpio_setup();
+
   nvic_setup();
+
+  exti_setup();
 
   gpio_set(GPIOC, GPIO13); /* LED off */
 
