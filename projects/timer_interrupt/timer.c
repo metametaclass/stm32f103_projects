@@ -42,6 +42,14 @@ static void nvic_setup(void)
 }
 
 
+static void exti_enable_request1(uint32_t extis)
+{
+  /* Enable interrupts. */
+  EXTI_IMR |= extis;
+
+}
+
+
 static void exti_setup(void)
 {
   /* Enable GPIOA clock. */
@@ -72,11 +80,11 @@ static void exti_setup(void)
   exti_set_trigger(EXTI6, EXTI_TRIGGER_BOTH);
   exti_set_trigger(EXTI5, EXTI_TRIGGER_BOTH);
 
-  exti_enable_request(EXTI9);
-  exti_enable_request(EXTI8);
-  exti_enable_request(EXTI7);
-  exti_enable_request(EXTI6);
-  exti_enable_request(EXTI5);
+  exti_enable_request1(EXTI9);
+  exti_enable_request1(EXTI8);
+  exti_enable_request1(EXTI7);
+  exti_enable_request1(EXTI6);
+  exti_enable_request1(EXTI5);
 }
 
 
