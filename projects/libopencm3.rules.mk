@@ -204,7 +204,7 @@ styleclean: $(STYLECHECKFILES:=.styleclean)
 
 %.flashwin: %.hex
 	@printf "  FLASH  $<\n"
-	$(Q)$(STLINKUTIL) -P $(*).hex -V
+	$(Q)$(STLINKUTIL) -P $(*).hex -V -Rst
 
 
 %.stlink-flash: %.bin
