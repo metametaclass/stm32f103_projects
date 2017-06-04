@@ -60,7 +60,7 @@ static void trace_setup(void)
 
 static void gpio_setup(void)
 {
-    /* Set GPIO12 (in GPIO port C) to 'output push-pull'. */
+    /* Set GPIO13 (in GPIO port C) to 'output push-pull'. */
     gpio_set_mode(GPIOC, GPIO_MODE_OUTPUT_2_MHZ,
               GPIO_CNF_OUTPUT_PUSHPULL, GPIO13);
 }
