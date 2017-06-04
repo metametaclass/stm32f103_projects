@@ -5,9 +5,11 @@ http://www.eevblog.com/forum/microcontrollers/quick-hack-to-get-swo-on-st-link-c
 
 
 Connection to original st-link v2 (20-pin header):
+```
 1 - Vcc
 4 - GND
 7 - SWDIO
 9 - SWDCLK
 13- PB3 (SWO trace)
+```
 
